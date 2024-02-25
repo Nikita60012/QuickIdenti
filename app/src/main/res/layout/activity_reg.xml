@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/regEditTextTextEmailAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="224dp"
+        android:autofillHints="emailAddress"
+        android:ems="10"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toTopOf="@+id/regEditTextTextPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/regPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:autofillHints="phone"
+        android:ems="10"
+        android:hint="@string/phone_number"
+        android:inputType="phone"
+        app:layout_constraintStart_toStartOf="@+id/regEditTextTextPasswordTwice"
+        app:layout_constraintTop_toBottomOf="@+id/regEditTextTextPasswordTwice" />
+
+    <EditText
+        android:id="@+id/regEditTextTextPasswordTwice"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:autofillHints="password"
+        android:ems="10"
+        android:hint="@string/password_twice"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toStartOf="@+id/regEditTextTextPassword"
+        app:layout_constraintTop_toBottomOf="@+id/regEditTextTextPassword" />
+
+    <EditText
+        android:id="@+id/regEditTextTextPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:autofillHints="password"
+        android:ems="10"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toStartOf="@+id/regEditTextTextEmailAddress"
+        app:layout_constraintTop_toBottomOf="@+id/regEditTextTextEmailAddress" />
+
+    <Button
+        android:id="@+id/regSignUpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/sign_up"
+        app:layout_constraintStart_toStartOf="@+id/regIncorrectPasswords"
+        app:layout_constraintTop_toBottomOf="@+id/regIncorrectPasswords" />
+
+    <TextView
+        android:id="@+id/regIncorrectPasswords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="29dp"
+        android:text="@string/password_is_not_equals"
+        android:visibility="invisible"
+        app:layout_constraintBaseline_toBaselineOf="@+id/regIncorrectData"
+        app:layout_constraintStart_toStartOf="@+id/regPhone" />
+
+    <TextView
+        android:id="@+id/regIncorrectData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/incorrect_data"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/regIncorrectPasswords"
+        app:layout_constraintTop_toBottomOf="@+id/regPhone" />
+</androidx.constraintlayout.widget.ConstraintLayout>

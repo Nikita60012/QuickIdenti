@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="registration">Регистрация</string>
+    <string name="authorization">Авторизация</string>
+    <string name="password">Пароль</string>
+    <string name="email">Почта</string>
+    <string name="lost_password">Забыли пароль?</string>
+    <string name="sign_in">Войти</string>
+    <string name="incorrect_data">Неверные данные</string>
+    <string name="password_twice">Пароль ещё раз</string>
+    <string name="phone_number">Телефон</string>
+    <string name="sign_up">Зарегестрироваться</string>
+    <string name="password_is_not_equals">Пароли не совпадают</string>
+    <string name="subscription">Подписка</string>
+    <string name="people_list">Список людей</string>
+    <string name="identification">Идентификация</string>
+    <string name="remember_me">Запомнить меня</string>
+    <string name="take_photo">Сделать фотографию</string>
+    <string name="identificate">Идентифицировать</string>
+    <string name="back_to_menu">Вернуться в меню</string>
+    <string name="subscribe_info">Выберите свою подписку</string>
+    <string name="slots">Места</string>
+    <string name="days">Дни</string>
+    <string name="buy">Купить</string>
+    <string name="zero">0</string>
+</resources>

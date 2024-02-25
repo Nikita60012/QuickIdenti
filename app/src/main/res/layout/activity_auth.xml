@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/authEditTextTextEmailAddress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginTop="226dp"
+        android:layout_marginEnd="38dp"
+        android:layout_marginBottom="53dp"
+        android:autofillHints="emailAddress"
+        android:ems="10"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toTopOf="@+id/authCheckBoxRememberMe"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/authEditTextTextPassword"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="38dp"
+        android:layout_marginBottom="46dp"
+        android:autofillHints="password"
+        android:ems="10"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toBottomOf="@+id/authCheckBoxRememberMe"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/authEditTextTextEmailAddress" />
+
+    <TextView
+        android:id="@+id/authForgetPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="21dp"
+        android:text="@string/lost_password"
+        app:layout_constraintBottom_toTopOf="@+id/authSignInButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authCheckBoxRememberMe" />
+
+    <Button
+        android:id="@+id/authSignInButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="11dp"
+        android:layout_marginBottom="19dp"
+        android:text="@string/sign_in"
+        app:layout_constraintBottom_toTopOf="@+id/authIncorrectData"
+        app:layout_constraintStart_toStartOf="@+id/authForgetPass"
+        app:layout_constraintTop_toBottomOf="@+id/authForgetPass" />
+
+    <TextView
+        android:id="@+id/authIncorrectData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="194dp"
+        android:text="@string/incorrect_data"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/authSignInButton"
+        app:layout_constraintTop_toBottomOf="@+id/authSignInButton" />
+
+    <CheckBox
+        android:id="@+id/authCheckBoxRememberMe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="29dp"
+        android:text="@string/remember_me"
+        app:layout_constraintBottom_toTopOf="@+id/authForgetPass"
+        app:layout_constraintStart_toStartOf="@+id/authEditTextTextPassword"
+        app:layout_constraintTop_toBottomOf="@+id/authEditTextTextEmailAddress" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
