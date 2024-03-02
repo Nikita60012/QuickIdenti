@@ -4,7 +4,7 @@
     <string name="authorization">Authorization</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
-    <string name="lost_password">Forget password?</string>
+    <string name="lost_password">If you forget password - write on email: ivanov.nikita600@yandex.ru</string>
     <string name="sign_in">Sign in</string>
     <string name="incorrect_data">Incorrect data</string>
     <string name="password_twice">Password again</string>
@@ -25,4 +25,8 @@
     <string name="days">Days</string>
     <string name="buy">Buy</string>
     <string name="zero">0</string>
+    <string name="welcome">Sign in account</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="create_account">Create account</string>
 </resources>

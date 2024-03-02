@@ -4,7 +4,7 @@
     <string name="authorization">Авторизация</string>
     <string name="password">Пароль</string>
     <string name="email">Почта</string>
-    <string name="lost_password">Забыли пароль?</string>
+    <string name="lost_password">Если забыли пароль - пишите на почту: ivanov.nikita600@yandex.ru</string>
     <string name="sign_in">Войти</string>
     <string name="incorrect_data">Неверные данные</string>
     <string name="password_twice">Пароль ещё раз</string>
@@ -23,4 +23,8 @@
     <string name="days">Дни</string>
     <string name="buy">Купить</string>
     <string name="zero">0</string>
+    <string name="welcome">Водите в аккаунт</string>
+    <string name="hide_password">Спрятать пароль</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="create_account">Создать аккаунт</string>
 </resources>
