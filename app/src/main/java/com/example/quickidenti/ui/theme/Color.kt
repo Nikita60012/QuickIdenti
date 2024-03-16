@@ -2,10 +2,10 @@ package com.example.quickidenti.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Primary = Color(0xFF92A3FD)
-val Secondary = Color(0xFF9DCEFF)
+val Primary = Color(0xFF80C8FF)
+val PrimarySlider = Color(0xFF6E9ABB)
+val Secondary = Color(0xFFD0FF8E)
+val SecondarySlider = Color(0xFF8EAC65)
 val TextColor = Color(0xFF1D1617)
-val AccentColor = Color(0xFFC58BF2)
-val GrayColor = Color(0xFF7B6F72)
-val WhiteColor = Color(0xFFFFFFFF)
+val TextLinkColor = Color(0xFFB0A7FF)
 val BgColor = Color(0xFFF7F8F8)

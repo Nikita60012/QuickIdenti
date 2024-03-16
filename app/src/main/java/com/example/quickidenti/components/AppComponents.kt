@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -45,50 +47,46 @@ import com.example.quickidenti.ui.theme.BgColor
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.Secondary
 import com.example.quickidenti.ui.theme.TextColor
+import com.example.quickidenti.ui.theme.TextLinkColor
 
 @Composable
-fun NormalTextComponent(value: String){
+fun TextComponent(value: String,
+                  fontSize: Int = 18,
+                  textAlign: TextAlign = TextAlign.Center,
+                  fontWeight: FontWeight = FontWeight.Normal,
+                  heightIn: Int = 24){
     Text(
         text = value,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 24.dp),
+            .heightIn(min = heightIn.dp),
         style = TextStyle(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            fontWeight = fontWeight,
             fontStyle = FontStyle.Normal
         ),
         color = TextColor,
-        textAlign = TextAlign.Center
-    )
-}
-@Composable
-fun HeadingTextComponent(value: String){
-    Text(
-        text = value,
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 40.dp),
-        style = TextStyle(
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            fontStyle = FontStyle.Normal
-        ),
-        color = TextColor
+        textAlign = textAlign
     )
 }
 
-@Composable
-fun NormalTextFieldComponent(labelValue: String, painterResource: Painter){
-    val textValue = remember{
-        mutableStateOf("")
-    }
 
+@Composable
+fun TextFieldComponent(
+    labelValue: String,
+    painterResource: Painter?,
+    textValue: String,
+    onValueChange: (String) -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default){
+//    val textValue = remember{
+//        mutableStateOf("")
+//    }
+    if (painterResource != null)
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(4.dp)),
-        value = textValue.value,
+        value = textValue,
         label = { Text(text = labelValue) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor =  Primary,
@@ -96,75 +94,127 @@ fun NormalTextFieldComponent(labelValue: String, painterResource: Painter){
             cursorColor = Primary,
             backgroundColor = BgColor
         ),
-        keyboardOptions = KeyboardOptions.Default,
-
-        onValueChange = {
-            textValue.value = it
-        },
+        keyboardOptions = keyboardOptions,
+        singleLine = true,
+        onValueChange = onValueChange,
         leadingIcon = {
             Icon(painter = painterResource, contentDescription = "")
         }
     )
+    else
+        OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape = RoundedCornerShape(4.dp)),
+        value = textValue,
+        label = { Text(text = labelValue) },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor =  Primary,
+            focusedLabelColor = Primary,
+            cursorColor = Primary,
+            backgroundColor = BgColor
+        ),
+        keyboardOptions = keyboardOptions,
+        singleLine = true,
+        onValueChange = onValueChange
+    )
 }
 
 @Composable
-fun PasswordTextFieldComponent(labelValue: String, painterResource: Painter){
-    val password = remember{
-        mutableStateOf("")
-    }
+fun PasswordTextFieldComponent(labelValue: String,
+                               painterResource: Painter?,
+                               password: String,
+                               onPassChange: (String) -> Unit){
 
     val passwordVisible = remember {
         mutableStateOf(false)
     }
 
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(4.dp)),
-        value = password.value,
-        label = { Text(text = labelValue) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Primary,
-            focusedLabelColor = Primary,
-            cursorColor = Primary,
-            backgroundColor = BgColor
-        ),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+    if(painterResource != null)
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(4.dp)),
+            value = password,
+            label = { Text(text = labelValue) },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Primary,
+                focusedLabelColor = Primary,
+                cursorColor = Primary,
+                backgroundColor = BgColor
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
+            onValueChange = onPassChange,
+            leadingIcon = {
 
-        onValueChange = {
-            password.value = it
-        },
-        leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "")
-        },
-        trailingIcon = {
-            val iconImage = if(passwordVisible.value){
-                Icons.Filled.Visibility
-            } else{
-                Icons.Filled.VisibilityOff
-            }
+                Icon(painter = painterResource, contentDescription = "")
+            },
+            trailingIcon = {
+                val iconImage = if(passwordVisible.value){
+                    Icons.Filled.Visibility
+                } else{
+                    Icons.Filled.VisibilityOff
+                }
 
-            var description = if(passwordVisible.value){
-                stringResource(id = R.string.hide_password)
-            }else{
-                stringResource(id = R.string.show_password)
-            }
-            
-            IconButton(onClick = { passwordVisible.value = !passwordVisible.value}) {
-                Icon(imageVector = iconImage, contentDescription = description)
-            }
-        },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
-    )
+                val description = if(passwordVisible.value){
+                    stringResource(id = R.string.hide_password)
+                }else{
+                    stringResource(id = R.string.show_password)
+                }
+
+                IconButton(onClick = { passwordVisible.value = !passwordVisible.value}) {
+                    Icon(imageVector = iconImage, contentDescription = description)
+                }
+            },
+            visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
+        )
+    else
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(4.dp)),
+            value = password,
+            label = { Text(text = labelValue) },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Primary,
+                focusedLabelColor = Primary,
+                cursorColor = Primary,
+                backgroundColor = BgColor
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
+            onValueChange = onPassChange,
+            trailingIcon = {
+                val iconImage = if(passwordVisible.value){
+                    Icons.Filled.Visibility
+                } else{
+                    Icons.Filled.VisibilityOff
+                }
+
+                val description = if(passwordVisible.value){
+                    stringResource(id = R.string.hide_password)
+                }else{
+                    stringResource(id = R.string.show_password)
+                }
+
+                IconButton(onClick = { passwordVisible.value = !passwordVisible.value}) {
+                    Icon(imageVector = iconImage, contentDescription = description)
+                }
+            },
+            visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
+        )
 }
 
 @Composable
-fun ButtonComponent(value: String){
+fun ButtonComponent(value: String,
+                    modifier: Modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(48.dp),
+                    action: () -> Unit){
     Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(48.dp),
-        onClick = {},
+        modifier = modifier,
+        onClick = action,
         contentPadding = PaddingValues(),
         colors = ButtonDefaults.buttonColors(Color.Transparent),
         shape = RoundedCornerShape(50.dp)
@@ -186,11 +236,36 @@ fun ButtonComponent(value: String){
     }
     
 }
+@Composable
+fun ImageButtonComponent(imageVector: ImageVector, description: String, action: () -> Unit){
+    Button(
+        modifier = Modifier
+            .widthIn(48.dp)
+            .heightIn(48.dp),
+        onClick = action,
+        contentPadding = PaddingValues(),
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        shape = RoundedCornerShape(50.dp)
+    ) {
+        Box(modifier = Modifier
+            .widthIn(48.dp)
+            .heightIn(48.dp)
+            .background(
+                brush = Brush.radialGradient(listOf(Secondary, Primary)),
+                shape = RoundedCornerShape(50.dp)
+            ),
+            contentAlignment = Alignment.Center
+        ){
+            Icon(imageVector = imageVector, contentDescription = description)
+        }
+    }
+
+}
 
 @Composable
 fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
     val annotatedString = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = Primary)){
+        withStyle(style = SpanStyle(color = TextLinkColor)){
             pushStringAnnotation(
                 tag = value,
                 annotation = value)
@@ -217,3 +292,60 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
                     }
             })
 }
+
+//@OptIn(ExperimentalMaterialApi::class)
+//@Composable
+//fun ExpandableCard(id: Int, title: String, onItemClick: (Int) -> Unit, expandedItemId: Int){
+//    var expandedState by remember{ mutableStateOf(false) }
+//    val rotation = animateFloatAsState(targetValue = if (id == expandedItemId) 180f else 0f,
+//        label = ""
+//    )
+//    Card(modifier = Modifier
+//        .fillMaxWidth()
+//        .animateContentSize(
+//            animationSpec = tween(
+//                durationMillis = 300,
+//                easing = LinearOutSlowInEasing
+//            )
+//        ),
+//        shape = RoundedCornerShape(4.dp),
+//        onClick = {
+//          expandedState = !expandedState
+//        }){
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(12.dp)
+//        ){
+//            Row(){
+//                Icon(
+//                    imageVector = Icons.Default.Person,
+//                    contentDescription = "Person",
+//                    modifier = Modifier
+//                        .size(60.dp)
+//                        .clip(CircleShape)
+//                )
+//                Text(
+//                    text = title,
+//                    fontSize = 20.sp,
+//                    modifier = Modifier.weight(1f)
+//                )
+//                Spacer(modifier = Modifier.width(12.dp))
+//                Image(
+//                    imageVector = Icons.Default.KeyboardArrowUp,
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .align(Alignment.CenterVertically)
+//                        .graphicsLayer(
+//                            rotationZ = rotation.value
+//                        )
+//                        .clickable { onItemClick(id) }
+//                )
+//            }
+//            if(expandedState){
+//                TextComponent(value = "Some text heeeeereeeee")
+//            }
+//        }
+//    }
+//}
+

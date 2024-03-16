@@ -19,7 +19,7 @@
     <string name="identificate">Идентифицировать</string>
     <string name="back_to_menu">Вернуться в меню</string>
     <string name="subscribe_info">Выберите свою подписку</string>
-    <string name="slots">Места</string>
+    <string name="slots">Слоты</string>
     <string name="days">Дни</string>
     <string name="buy">Купить</string>
     <string name="zero">0</string>
@@ -27,4 +27,5 @@
     <string name="hide_password">Спрятать пароль</string>
     <string name="show_password">Показать пароль</string>
     <string name="create_account">Создать аккаунт</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
 </resources>
