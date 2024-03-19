@@ -78,9 +78,6 @@ fun TextFieldComponent(
     textValue: String,
     onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default){
-//    val textValue = remember{
-//        mutableStateOf("")
-//    }
     if (painterResource != null)
     OutlinedTextField(
         modifier = Modifier
@@ -292,60 +289,3 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
                     }
             })
 }
-
-//@OptIn(ExperimentalMaterialApi::class)
-//@Composable
-//fun ExpandableCard(id: Int, title: String, onItemClick: (Int) -> Unit, expandedItemId: Int){
-//    var expandedState by remember{ mutableStateOf(false) }
-//    val rotation = animateFloatAsState(targetValue = if (id == expandedItemId) 180f else 0f,
-//        label = ""
-//    )
-//    Card(modifier = Modifier
-//        .fillMaxWidth()
-//        .animateContentSize(
-//            animationSpec = tween(
-//                durationMillis = 300,
-//                easing = LinearOutSlowInEasing
-//            )
-//        ),
-//        shape = RoundedCornerShape(4.dp),
-//        onClick = {
-//          expandedState = !expandedState
-//        }){
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(12.dp)
-//        ){
-//            Row(){
-//                Icon(
-//                    imageVector = Icons.Default.Person,
-//                    contentDescription = "Person",
-//                    modifier = Modifier
-//                        .size(60.dp)
-//                        .clip(CircleShape)
-//                )
-//                Text(
-//                    text = title,
-//                    fontSize = 20.sp,
-//                    modifier = Modifier.weight(1f)
-//                )
-//                Spacer(modifier = Modifier.width(12.dp))
-//                Image(
-//                    imageVector = Icons.Default.KeyboardArrowUp,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .align(Alignment.CenterVertically)
-//                        .graphicsLayer(
-//                            rotationZ = rotation.value
-//                        )
-//                        .clickable { onItemClick(id) }
-//                )
-//            }
-//            if(expandedState){
-//                TextComponent(value = "Some text heeeeereeeee")
-//            }
-//        }
-//    }
-//}
-

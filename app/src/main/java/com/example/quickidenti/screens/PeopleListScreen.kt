@@ -64,7 +64,6 @@ fun PeopleListScreen(){
         }
     }
     BackHandler(enabled = true) {
-        Log.i("history", "${QuickIdentiAppRouter.historyScreenList} and ${QuickIdentiAppRouter.lastHistoryIndex}")
         QuickIdentiAppRouter.navigateTo(QuickIdentiAppRouter.historyScreenList[QuickIdentiAppRouter.lastHistoryIndex.value], false)
     }
 }
@@ -80,6 +79,7 @@ fun SimpleLazyColumnScreen(element: List<Element>) {
                     Log.i("Delete", "Man delete $id")
                 },
                     onItemClick = { id ->
+                        Log.i("Click", "Man click $id")
                     QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
                 })
             }

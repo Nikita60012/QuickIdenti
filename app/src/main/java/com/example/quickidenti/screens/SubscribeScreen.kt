@@ -81,7 +81,7 @@ fun SubscribeScreen(){
 
             Spacer(modifier = Modifier.height(30.dp))
             TextComponent(
-                value = "Сумма: ${slotsSliderPosition * 5 + daysSliderPosition * 10}  руб.",
+                value = "${stringResource(id = R.string.price)}: ${slotsSliderPosition * 5 + daysSliderPosition * 10}  руб.",
                 fontSize = 20)
             Spacer(modifier = Modifier.height(30.dp))
             ButtonComponent(value = stringResource(id = R.string.buy)) {

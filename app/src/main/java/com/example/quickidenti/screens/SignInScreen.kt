@@ -37,6 +37,7 @@ fun SignInScreen(){
     val password = rememberSaveable{ mutableStateOf("") }
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val context = LocalContext.current
+    val incorrectText = stringResource(id = R.string.email_or_pass_incorrect)
 
     Surface(
         modifier = Modifier
@@ -74,7 +75,7 @@ fun SignInScreen(){
                     if(password.value == "123" && emailValue.value == "123@mail.com")
                         QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
                     else
-                        Toast.makeText(context, "Почта или пароль неверны", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, incorrectText, Toast.LENGTH_LONG).show()
                 })
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

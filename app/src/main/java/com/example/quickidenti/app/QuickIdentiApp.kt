@@ -18,6 +18,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.example.quickidenti.R
 import com.example.quickidenti.navigation.AppBar
 import com.example.quickidenti.navigation.DrawerBody
 import com.example.quickidenti.navigation.DrawerHeaderNav
@@ -58,31 +60,31 @@ fun QuickIdentiApp() {
                 items = listOf(
                     MenuItem(
                         id = "identification",
-                        title = "Идентификация",
+                        title = stringResource(id = R.string.identification),
                         contentDescription = "Identification",
                         icon = Icons.Default.PhotoCamera
                     ),
                     MenuItem(
                         id = "peopleList",
-                        title = "Список людей",
+                        title = stringResource(id = R.string.people_list),
                         contentDescription = "People list",
                         icon = Icons.AutoMirrored.Filled.List
                     ),
                     MenuItem(
                         id = "profile",
-                        title = "Профиль",
+                        title = stringResource(id = R.string.profile),
                         contentDescription = "Accaunt profile",
                         icon = Icons.Default.AccountCircle
                     ),
                     MenuItem(
                         id = "subscribe",
-                        title = "Подписка",
+                        title = stringResource(id = R.string.subscribe),
                         contentDescription = "Subscribe",
                         icon = Icons.Default.MonetizationOn
                     ),
                     MenuItem(
                         id = "logout",
-                        title = "Выход из аккаунта",
+                        title = stringResource(id = R.string.logout),
                         contentDescription = "Log out",
                         icon = Icons.AutoMirrored.Filled.Logout
                     ),

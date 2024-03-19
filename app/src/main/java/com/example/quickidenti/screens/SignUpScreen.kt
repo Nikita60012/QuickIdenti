@@ -42,6 +42,8 @@ fun SignUpScreen(){
     val passwordToSubmit = remember { mutableStateOf("") }
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val phoneValue = rememberSaveable{ mutableStateOf("")}
+    val passwordsAreNotEquals = stringResource(id = R.string.passwords_are_not_equals)
+    val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
 
     Surface(
         modifier = Modifier
@@ -72,7 +74,7 @@ fun SignUpScreen(){
                     password.value = it
                 })
             PasswordTextFieldComponent(
-                labelValue = stringResource(id = R.string.password_twice),
+                labelValue = stringResource(id = R.string.password_to_submit),
                 painterResource = painterResource(id = R.drawable.lock_outline),
                 password = passwordToSubmit.value,
                 onPassChange = {
@@ -94,9 +96,9 @@ fun SignUpScreen(){
                     if(password.value == passwordToSubmit.value)
                         QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
                     else
-                        Toast.makeText(context, "Пароли не совпадают", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, passwordsAreNotEquals, Toast.LENGTH_LONG).show()
                     else
-                    Toast.makeText(context, "Введённые данные не корректны", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, enteringDataIncorrect, Toast.LENGTH_LONG).show()
             }
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

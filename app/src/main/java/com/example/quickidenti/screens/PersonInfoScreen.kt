@@ -33,9 +33,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.quickidenti.R
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
@@ -47,6 +49,7 @@ import com.example.quickidenti.ui.theme.Secondary
 @Composable
 fun PersonInfoScreen() {
 
+    val changesSaved = stringResource(id = R.string.changes_saved)
     val context = LocalContext.current
     val fullName = rememberSaveable { mutableStateOf("")}
     val phoneValue = rememberSaveable{ mutableStateOf("")}
@@ -56,10 +59,7 @@ fun PersonInfoScreen() {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { if (it) {
-            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
             launcher.launch()
-        } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -90,21 +90,21 @@ fun PersonInfoScreen() {
                 }
             }
             Spacer(modifier = Modifier.height(50.dp))
-            TextComponent(value = "ФИО", textAlign = TextAlign.Start)
+            TextComponent(value = stringResource(id = R.string.fullname), textAlign = TextAlign.Start)
             TextFieldComponent(labelValue = "Иванов Иван Иваныч",
                 textValue = fullName.value,
                 onValueChange = {fullName.value = it},
                 painterResource = null)
             Spacer(modifier = Modifier.height(30.dp))
 
-            TextComponent(value = "Дата рождения", textAlign = TextAlign.Start)
+            TextComponent(value = stringResource(id = R.string.birthdate), textAlign = TextAlign.Start)
             TextFieldComponent(labelValue = "1999.01.01",
                 textValue = birthdate.value,
                 onValueChange = {birthdate.value = it},
                 painterResource = null)
             Spacer(modifier = Modifier.height(30.dp))
 
-            TextComponent(value = "Телефон", textAlign = TextAlign.Start)
+            TextComponent(value = stringResource(id = R.string.phone_number), textAlign = TextAlign.Start)
             TextFieldComponent(labelValue = "8 (800)555 35-35",
                 textValue = phoneValue.value,
                 onValueChange = {phoneValue.value = it},
@@ -112,15 +112,15 @@ fun PersonInfoScreen() {
             Spacer(modifier = Modifier.height(60.dp))
 
             Row(modifier = Modifier.fillMaxWidth()){
-                ButtonComponent(value = "save changes",
+                ButtonComponent(value = stringResource(id = R.string.save),
                     modifier = Modifier
                         .width(200.dp)
                         .heightIn(48.dp)
                         .weight(1.5f)
                         .padding(5.dp)) {
-                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
                 }
-                ButtonComponent(value = "Back",
+                ButtonComponent(value = stringResource(id = R.string.back),
                     modifier = Modifier
                         .width(200.dp)
                         .heightIn(48.dp)

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +48,12 @@ fun ProfileScreen(){
     val oldPassword = remember { mutableStateOf("")}
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val phoneValue = rememberSaveable{ mutableStateOf("")}
+    val changesSaved = stringResource(id = R.string.changes_saved)
+    val currentPasswordIncorrect = stringResource(id = R.string.current_password_incorrect)
+    val newPassDuplicateCurrent = stringResource(id = R.string.new_pass_duplicate_current)
+    val passwordsAreNotEquals =  stringResource(id = R.string.passwords_are_not_equals)
+    val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
+    val exitFromApp = stringResource(id = R.string.exit_from_app)
 
     Surface(
         modifier = Modifier
@@ -61,7 +68,7 @@ fun ProfileScreen(){
             horizontalAlignment = Alignment.Start
         ) {
             TextFieldComponent(
-                labelValue = "Почта",
+                labelValue = stringResource(id = R.string.email),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 textValue = emailValue.value,
                 onValueChange = {emailValue.value = it},
@@ -71,7 +78,7 @@ fun ProfileScreen(){
             )
             Spacer(modifier = Modifier.height(20.dp))
             TextFieldComponent(
-                labelValue = "Телефон",
+                labelValue = stringResource(id = R.string.phone_number),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 textValue = phoneValue.value,
                 onValueChange = {phoneValue.value = it},
@@ -81,13 +88,13 @@ fun ProfileScreen(){
             )
 
             Spacer(modifier = Modifier.height(40.dp))
-            TextComponent(value = "Дней осталось: 90", textAlign = TextAlign.Start)
+            TextComponent(value = "${stringResource(id = R.string.days_left)}: 90", textAlign = TextAlign.Start)
             Spacer(modifier = Modifier.height(10.dp))
-            TextComponent(value = "Слоты: 30/50", textAlign = TextAlign.Start)
+            TextComponent(value = "${stringResource(id = R.string.slots)}: 30/50", textAlign = TextAlign.Start)
             Spacer(modifier = Modifier.height(40.dp))
 
             PasswordTextFieldComponent(
-                labelValue = "Новый пароль",
+                labelValue = stringResource(id = R.string.new_password),
                 painterResource = painterResource(id = R.drawable.lock_outline),
                 password = newPassword.value,
                 onPassChange = {
@@ -95,7 +102,7 @@ fun ProfileScreen(){
                 }
             )
             PasswordTextFieldComponent(
-                labelValue = "Подтверждение пароля",
+                labelValue = stringResource(id = R.string.password_to_submit),
                 painterResource = painterResource(id = R.drawable.lock_outline),
                 password = passwordToSubmit.value,
                 onPassChange = {
@@ -104,7 +111,7 @@ fun ProfileScreen(){
             )
             Spacer(modifier = Modifier.height(50.dp))
             PasswordTextFieldComponent(
-                labelValue = "Старый пароль",
+                labelValue = stringResource(id = R.string.old_password),
                 painterResource = painterResource(id = R.drawable.lock_outline),
                 password = oldPassword.value,
                 onPassChange = {
@@ -112,21 +119,21 @@ fun ProfileScreen(){
                 }
             )
             Spacer(modifier = Modifier.height(50.dp))
-            ButtonComponent(value = "Сохранить изменения") {
+            ButtonComponent(value = stringResource(id = R.string.save_changes)) {
                 if(Pattern.matches("(.+@)((mail\\.(com|ru))|(yandex\\.ru))", emailValue.value)
                     && Pattern.matches("(\\+|^)\\d{11}", phoneValue.value)){
                     if (newPassword.value == passwordToSubmit.value) {
                         if(newPassword.value != oldPassword.value) {
                             if (oldPassword.value == "123") {
-                                Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
                             } else
-                                Toast.makeText(context, "Текущий пароль неверен", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, currentPasswordIncorrect, Toast.LENGTH_LONG).show()
                         }else
-                            Toast.makeText(context, "Новый пароль не должен совпадать с текущим", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, newPassDuplicateCurrent, Toast.LENGTH_LONG).show()
                     }else
-                        Toast.makeText(context, "Пароли не совпадают", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, passwordsAreNotEquals, Toast.LENGTH_LONG).show()
                 }else
-                    Toast.makeText(context, "Введённые данные не корректны", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, enteringDataIncorrect, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -140,7 +147,7 @@ fun ProfileScreen(){
                 exitProcess(0)
             }
             backCount.intValue++
-            Toast.makeText(context, "При повторном нажатии вы выйдете из приложения", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, exitFromApp, Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -1,33 +1,43 @@
 <resources>
     <string name="app_name" translatable="false">QuickIdenti</string>
     <string name="registration">Registration</string>
-    <string name="authorization">Authorization</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
     <string name="lost_password">If you forget password - write on email: ivanov.nikita600@yandex.ru</string>
     <string name="sign_in">Sign in</string>
-    <string name="incorrect_data">Incorrect data</string>
-    <string name="password_twice">Password again</string>
+    <string name="password_to_submit">Password to submit</string>
     <string name="phone_number">Phone</string>
     <string name="sign_up">Sign up</string>
-    <string name="password_is_not_equals">Passwords is not equals</string>
-    <string name="subscription">Subscription</string>
-    <string name="people_list">People list</string>
-    <string name="identification">Identification</string>
-    <string name="exit_button" translatable="false">ExitButton</string>
-    <string name="remember_me">Remember me</string>
-    <string name="take_photo">Take photo</string>
-    <string name="identificate">Identificate</string>
-    <string name="stranger_photo" translatable="false">StrangerPhoto</string>
-    <string name="back_to_menu">Back to menu</string>
     <string name="subscribe_info">Choose your subscribe</string>
     <string name="slots">Slots</string>
     <string name="days">Days</string>
     <string name="buy">Buy</string>
-    <string name="zero">0</string>
     <string name="welcome">Sign in account</string>
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
     <string name="create_account">Create account</string>
     <string name="already_have_account">Already have account?</string>
+    <string name="email_or_pass_incorrect">Email or password incorrect</string>
+    <string name="passwords_are_not_equals">Passwords are not equals</string>
+    <string name="entering_data_incorrect">Entering data incorrect</string>
+    <string name="price">Price</string>
+    <string name="days_left">Days left</string>
+    <string name="new_password">New password</string>
+    <string name="old_password">Old password</string>
+    <string name="save_changes">Save changes</string>
+    <string name="changes_saved">Changes saved</string>
+    <string name="current_password_incorrect">Current password incorrect</string>
+    <string name="new_pass_duplicate_current">New password must not duplicate current password</string>
+    <string name="exit_from_app">With tap once more you will exit from app</string>
+    <string name="identification_result">Conclusion</string>
+    <string name="back_to_identification">Back to identification</string>
+    <string name="fullname">Fullname</string>
+    <string name="birthdate">Birthdate</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="identification">Identification</string>
+    <string name="people_list">People list</string>
+    <string name="profile">Profile</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="logout">Logout</string>
 </resources>

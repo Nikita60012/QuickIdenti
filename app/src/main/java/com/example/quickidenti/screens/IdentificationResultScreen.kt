@@ -19,8 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.quickidenti.R
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.ImageButtonComponent
 import com.example.quickidenti.components.TextComponent
@@ -38,8 +40,7 @@ fun IdentificationResultScreen(){
             .padding(28.dp)
     ) {
         Column(verticalArrangement = Arrangement.Center) {
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Row(modifier = Modifier.fillMaxWidth()
             ) {
                 Box(modifier = Modifier
                     .height(220.dp)
@@ -47,6 +48,7 @@ fun IdentificationResultScreen(){
                     .background(
                         brush = Brush.linearGradient(listOf(Primary, Secondary))
                     ))
+                Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier
                     .height(220.dp)
                     .width(160.dp)
@@ -58,17 +60,17 @@ fun IdentificationResultScreen(){
                 .fillMaxWidth()
                 .padding(20.dp)){
 
-                TextComponent(value = "Вердикт", fontSize = 24)
+                TextComponent(value = stringResource(id = R.string.identification_result), fontSize = 24)
             }
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp)) {
-                ImageButtonComponent(imageVector = Icons.Default.Info, description = "Account Info") {
+                ImageButtonComponent(imageVector = Icons.Default.Info, description = "Worker Info") {
                     QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
                 }
             }
             Spacer(modifier = Modifier.height(70.dp))
-            ButtonComponent(value = "Вернуться к идентификации") {
+            ButtonComponent(value = stringResource(id = R.string.back_to_identification)) {
                 QuickIdentiAppRouter.navigateTo(Screen.IdentificationScreen, false)
             }
             BackHandler(enabled = true) {
