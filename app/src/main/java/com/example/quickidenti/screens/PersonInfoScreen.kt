@@ -1,6 +1,7 @@
 package com.example.quickidenti.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
+import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
@@ -45,9 +47,15 @@ import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.Secondary
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PersonInfoScreen() {
+
+
 
     val changesSaved = stringResource(id = R.string.changes_saved)
     val context = LocalContext.current
@@ -62,6 +70,13 @@ fun PersonInfoScreen() {
             launcher.launch()
         }
     }
+
+    val workerApi = retrofit.create(com.example.quickidenti.api.Worker::class.java)
+    CoroutineScope(Dispatchers.IO).launch {
+        val worker = workerApi.getWorker()
+        fullName.value = worker.fullname
+    }
+
 
     Surface(
         modifier = Modifier
@@ -91,21 +106,21 @@ fun PersonInfoScreen() {
             }
             Spacer(modifier = Modifier.height(50.dp))
             TextComponent(value = stringResource(id = R.string.fullname), textAlign = TextAlign.Start)
-            TextFieldComponent(labelValue = "Иванов Иван Иваныч",
+            TextFieldComponent(labelValue = "",
                 textValue = fullName.value,
                 onValueChange = {fullName.value = it},
                 painterResource = null)
             Spacer(modifier = Modifier.height(30.dp))
 
             TextComponent(value = stringResource(id = R.string.birthdate), textAlign = TextAlign.Start)
-            TextFieldComponent(labelValue = "1999.01.01",
+            TextFieldComponent(labelValue = "",
                 textValue = birthdate.value,
                 onValueChange = {birthdate.value = it},
                 painterResource = null)
             Spacer(modifier = Modifier.height(30.dp))
 
             TextComponent(value = stringResource(id = R.string.phone_number), textAlign = TextAlign.Start)
-            TextFieldComponent(labelValue = "8 (800)555 35-35",
+            TextFieldComponent(labelValue = "",
                 textValue = phoneValue.value,
                 onValueChange = {phoneValue.value = it},
                 painterResource = null)

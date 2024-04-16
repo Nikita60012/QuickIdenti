@@ -1,6 +1,9 @@
 package com.example.quickidenti.screens
 
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,27 +17,42 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
+import com.example.quickidenti.api.Subscribe
+import com.example.quickidenti.app.retrofit
+import com.example.quickidenti.app.user
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.TextComponent
+import com.example.quickidenti.dto.subscribe.SubscribeBuy
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.PrimarySlider
 import com.example.quickidenti.ui.theme.Secondary
 import com.example.quickidenti.ui.theme.SecondarySlider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SubscribeScreen(){
+    val context = LocalContext.current
     var slotsSliderPosition by remember{ mutableFloatStateOf(1f) }
     var daysSliderPosition by remember{ mutableFloatStateOf(1f) }
+    val isSuccess = remember { mutableStateOf(false)}
+    val subscribeApi = retrofit.create(Subscribe::class.java)
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -85,6 +103,17 @@ fun SubscribeScreen(){
                 fontSize = 20)
             Spacer(modifier = Modifier.height(30.dp))
             ButtonComponent(value = stringResource(id = R.string.buy)) {
+                CoroutineScope(Dispatchers.IO).launch {
+                   isSuccess.value = subscribeApi.buySubscribe(user.value, SubscribeBuy(
+                       days = daysSliderPosition.toInt(),
+                       slots = slotsSliderPosition.toInt()))
+                }
+                sleep(500)
+                if(isSuccess.value){
+                    Toast.makeText(context, "Подписка оформлена", Toast.LENGTH_SHORT).show()
+                }else{
+                    Toast.makeText(context, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -93,6 +122,7 @@ fun SubscribeScreen(){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun SubscribeScreenPreview(){

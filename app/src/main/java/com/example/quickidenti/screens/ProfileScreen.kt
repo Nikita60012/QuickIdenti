@@ -1,5 +1,6 @@
 package com.example.quickidenti.screens
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
@@ -29,18 +30,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.MainActivity
 import com.example.quickidenti.R
+import com.example.quickidenti.api.Client
+import com.example.quickidenti.app.retrofit
+import com.example.quickidenti.app.user
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
+import com.example.quickidenti.dto.client.ClientChangeData
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
+
+@SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @Composable
 fun ProfileScreen(){
-
     val backCount = remember { mutableIntStateOf(0) }
     val context = LocalContext.current
     val newPassword = remember { mutableStateOf("") }
@@ -54,6 +64,12 @@ fun ProfileScreen(){
     val passwordsAreNotEquals =  stringResource(id = R.string.passwords_are_not_equals)
     val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
     val exitFromApp = stringResource(id = R.string.exit_from_app)
+    val changesSavedStatus = remember { mutableStateOf(false)}
+    val clientApi = retrofit.create(Client::class.java)
+    val upd = updateClientData(clientApi)
+    val emailLabel = remember { mutableStateOf(upd[0])}
+    val phoneLabel = remember { mutableStateOf(upd[1])}
+
 
     Surface(
         modifier = Modifier
@@ -68,7 +84,7 @@ fun ProfileScreen(){
             horizontalAlignment = Alignment.Start
         ) {
             TextFieldComponent(
-                labelValue = stringResource(id = R.string.email),
+                labelValue = emailLabel.value,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 textValue = emailValue.value,
                 onValueChange = {emailValue.value = it},
@@ -78,7 +94,7 @@ fun ProfileScreen(){
             )
             Spacer(modifier = Modifier.height(20.dp))
             TextFieldComponent(
-                labelValue = stringResource(id = R.string.phone_number),
+                labelValue = phoneLabel.value,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 textValue = phoneValue.value,
                 onValueChange = {phoneValue.value = it},
@@ -124,10 +140,27 @@ fun ProfileScreen(){
                     && Pattern.matches("(\\+|^)\\d{11}", phoneValue.value)){
                     if (newPassword.value == passwordToSubmit.value) {
                         if(newPassword.value != oldPassword.value) {
-                            if (oldPassword.value == "123") {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    changesSavedStatus.value = clientApi.changeClientData(user.value,
+                                      ClientChangeData(emailValue.value,
+                                      newPassword.value,
+                                      oldPassword.value,
+                                      phoneValue.value))
+                                }
+                            sleep(100)
+                            if (changesSavedStatus.value) {
+                                user.value = emailValue.value
+                                val changesData = updateClientData(clientApi)
+                                emailLabel.value = changesData[0]
+                                phoneLabel.value = changesData[1]
                                 Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
-                            } else
+                                oldPassword.value = ""
+                                newPassword.value = ""
+                                passwordToSubmit.value = ""
+                            }else{
                                 Toast.makeText(context, currentPasswordIncorrect, Toast.LENGTH_LONG).show()
+                                oldPassword.value = ""
+                            }
                         }else
                             Toast.makeText(context, newPassDuplicateCurrent, Toast.LENGTH_LONG).show()
                     }else
@@ -152,6 +185,18 @@ fun ProfileScreen(){
     }
 }
 
+fun updateClientData(clientApi: Client): Array<String>{
+    var email: String = ""
+    var phone: String = ""
+    CoroutineScope(Dispatchers.IO).launch {
+        val client = clientApi.infoClient(user.value)
+        sleep(100)
+        email = client.email
+        phone = client.phone
+    }
+    sleep(200)
+    return arrayOf(email, phone)
+}
 @Preview
 @Composable
 fun ProfileScreenPreview(){

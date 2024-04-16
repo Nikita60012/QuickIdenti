@@ -21,7 +21,7 @@ object QuickIdentiAppRouter{
     var historyScreenList: MutableList<Screen> = mutableListOf()
     var previewScreen: MutableState<Screen> = mutableStateOf(Screen.SignInScreen)
     var lastHistoryIndex: MutableState<Int> = mutableIntStateOf(-1)
-    fun navigateTo(destination: Screen, nextOrBack: Boolean){
+    fun navigateTo(destination: Screen, nextOrBack: Boolean, workerId: Int = -1){
         if(nextOrBack){
             previewScreen.value = currentScreen.value
             historyScreenList.add(currentScreen.value)

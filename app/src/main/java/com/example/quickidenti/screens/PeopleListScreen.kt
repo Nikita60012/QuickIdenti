@@ -11,17 +11,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
@@ -31,12 +36,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
+import com.example.quickidenti.ui.theme.Primary
+import com.example.quickidenti.ui.theme.Secondary
 
 @Composable
 fun PeopleListScreen(){
@@ -60,7 +68,29 @@ fun PeopleListScreen(){
 
         val elements = listOf(el1, el2, el3, el4, el5, el6, el7, el8, el9, el10, el11)
         Column{
-            SimpleLazyColumnScreen(elements)
+            Box(modifier = Modifier
+                .padding(5.dp)
+                .fillMaxSize(),
+                contentAlignment = Alignment.BottomEnd){
+                SimpleLazyColumnScreen(elements)
+                FloatingActionButton(modifier = Modifier
+                    .widthIn(48.dp)
+                    .heightIn(48.dp),
+                    shape = RoundedCornerShape(50.dp),
+                    onClick = { /*TODO*/ }) {
+                    Box(modifier = Modifier
+                        .widthIn(48.dp)
+                        .heightIn(48.dp)
+                        .background(
+                            brush = Brush.radialGradient(listOf(Secondary, Primary)),
+                            shape = RoundedCornerShape(50.dp)
+                        ),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add worker")
+                    }
+            }
+            }
         }
     }
     BackHandler(enabled = true) {
@@ -80,7 +110,7 @@ fun SimpleLazyColumnScreen(element: List<Element>) {
                 },
                     onItemClick = { id ->
                         Log.i("Click", "Man click $id")
-                    QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
+                    QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true, id)
                 })
             }
         }

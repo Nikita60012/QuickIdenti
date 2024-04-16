@@ -1,5 +1,6 @@
 package com.example.quickidenti.screens
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -25,25 +26,36 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
+import com.example.quickidenti.app.retrofit
+import com.example.quickidenti.app.user
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.ClickableTextComponent
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
+import com.example.quickidenti.dto.client.ClientReg
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
 import java.util.regex.Pattern.matches
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun SignUpScreen(){
 
     val context = LocalContext.current
     val password = remember { mutableStateOf("") }
+    val isSuccess = remember { mutableStateOf(false)}
     val passwordToSubmit = remember { mutableStateOf("") }
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val phoneValue = rememberSaveable{ mutableStateOf("")}
     val passwordsAreNotEquals = stringResource(id = R.string.passwords_are_not_equals)
     val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
+    val clientApi = retrofit.create(com.example.quickidenti.api.Client::class.java)
+
 
     Surface(
         modifier = Modifier
@@ -93,8 +105,18 @@ fun SignUpScreen(){
             ) {
                 if(matches("(.+@)((mail\\.(com|ru))|(yandex\\.ru))", emailValue.value)
                     && matches("(\\+|^)\\d{11}", phoneValue.value))
-                    if(password.value == passwordToSubmit.value)
-                        QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                    if(password.value == passwordToSubmit.value) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            isSuccess.value = clientApi.regClient(ClientReg(emailValue.value, password.value, phoneValue.value))
+                        }
+                        sleep(500)
+                        if (isSuccess.value){
+                            user.value = emailValue.value
+                            QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                        }else{
+                            Toast.makeText(context, "Пользователь с этой почтой уже существует", Toast.LENGTH_LONG).show()
+                        }
+                    }
                     else
                         Toast.makeText(context, passwordsAreNotEquals, Toast.LENGTH_LONG).show()
                     else

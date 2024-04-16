@@ -1,6 +1,8 @@
 package com.example.quickidenti.app
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,11 +38,19 @@ import com.example.quickidenti.screens.SignInScreen
 import com.example.quickidenti.screens.SignUpScreen
 import com.example.quickidenti.screens.SubscribeScreen
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-
+val retrofit = Retrofit.Builder()
+    .baseUrl("http:/10.0.2.2:8000")
+    .addConverterFactory(GsonConverterFactory.create())
+    .build()
+var user = mutableStateOf("email")
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun QuickIdentiApp() {
+
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     Scaffold(
