@@ -70,7 +70,6 @@ fun ProfileScreen(){
     val emailLabel = remember { mutableStateOf(upd[0])}
     val phoneLabel = remember { mutableStateOf(upd[1])}
 
-
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -186,8 +185,8 @@ fun ProfileScreen(){
 }
 
 fun updateClientData(clientApi: Client): Array<String>{
-    var email: String = ""
-    var phone: String = ""
+    var email = ""
+    var phone = ""
     CoroutineScope(Dispatchers.IO).launch {
         val client = clientApi.infoClient(user.value)
         sleep(100)

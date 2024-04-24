@@ -97,6 +97,7 @@ fun SignInScreen(){
                         sleep(300)
                         if(changeFail.value)
                             Toast.makeText(context, incorrectData, Toast.LENGTH_LONG).show()
+
                 })
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

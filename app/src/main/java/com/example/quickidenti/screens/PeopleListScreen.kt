@@ -1,5 +1,6 @@
 package com.example.quickidenti.screens
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -41,38 +42,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quickidenti.api.People
+import com.example.quickidenti.app.people
+import com.example.quickidenti.app.retrofit
+import com.example.quickidenti.app.user
+import com.example.quickidenti.dto.People.PeopleList
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.Secondary
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PeopleListScreen(){
+    var peoples: MutableList<PeopleList> = mutableListOf(PeopleList(0,"dummy"))
+    val listApi = retrofit.create(People::class.java)
+    CoroutineScope(Dispatchers.IO).launch {
+        peoples = listApi.getPeoples(user.value)
+
+    }
+    sleep(100)
     Surface(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(28.dp)
     ){
-        val el1 = Element(0, "nik")
-        val el2 = Element(1, "nik2")
-        val el3 = Element(2, "nik3")
-        val el4 = Element(3, "nik3")
-        val el5 = Element(4, "nik3")
-        val el6 = Element(5, "nik3")
-        val el7 = Element(6, "nik3")
-        val el8 = Element(7, "nik3")
-        val el9 = Element(8, "nik3")
-        val el10 = Element(9, "nik3")
-        val el11 = Element(10, "nik3")
-
-        val elements = listOf(el1, el2, el3, el4, el5, el6, el7, el8, el9, el10, el11)
+        val elements: MutableList<Element> =  mutableListOf(Element(0,"dummy"))
+        elements.removeAt(0)
+        for (i in 0..<peoples.size){
+            elements.add(Element(i, peoples[i].fullname))
+        }
         Column{
+            SimpleLazyColumnScreen(peoples)
             Box(modifier = Modifier
                 .padding(5.dp)
                 .fillMaxSize(),
                 contentAlignment = Alignment.BottomEnd){
-                SimpleLazyColumnScreen(elements)
+
                 FloatingActionButton(modifier = Modifier
                     .widthIn(48.dp)
                     .heightIn(48.dp),
@@ -98,19 +109,20 @@ fun PeopleListScreen(){
     }
 }
 @Composable
-fun SimpleLazyColumnScreen(element: List<Element>) {
+fun SimpleLazyColumnScreen(element: MutableList<PeopleList>) {
     val elements by remember { mutableStateOf(element) }
     Box {
         LazyColumn {
             items(elements) { element ->
                 PersonView(id = element.id,
-                    title = element.title,
+                    title = element.fullname,
                     deleteClick = {id ->
                     Log.i("Delete", "Man delete $id")
                 },
                     onItemClick = { id ->
                         Log.i("Click", "Man click $id")
-                    QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true, id)
+                        people.intValue = id
+                        QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
                 })
             }
         }
@@ -166,4 +178,4 @@ fun PeopleListScreenPreview(){
     PeopleListScreen()
 }
 
-class Element(var id: Int, var title: String)
+class Element(var id: Int, var fullname: String)
