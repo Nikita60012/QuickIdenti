@@ -2,6 +2,7 @@ package com.example.quickidenti.screens
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,6 +76,7 @@ fun IdentificationScreen(){
                         contentDescription = "PersonPhoto",
                         modifier = Modifier.fillMaxSize()
                     )
+                    Log.i("image", image.asImageBitmap().toString())
                 }
             }
             ButtonComponent(value = stringResource(id = R.string.identification)) {

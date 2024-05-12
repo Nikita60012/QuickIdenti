@@ -3,15 +3,14 @@ package com.example.quickidenti.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +53,7 @@ import com.example.quickidenti.ui.theme.Secondary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -77,8 +76,9 @@ fun PersonInfoScreen() {
     val fullName = remember { mutableStateOf(upd[0])}
     val birthdateValue = remember{ mutableStateOf(upd[1])}
     val phoneValue = remember{ mutableStateOf(upd[2])}
-    val photoByteArray = upd[3].toByteArray()
-    val photo = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeByteArray(photoByteArray, 0, photoByteArray.size))}
+    val photoByteArray = ByteBuffer.wrap(upd[3].toByteArray())
+    Log.i("bytea", photoByteArray.toString())
+//    val photo = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeByteArray(photoByteArray, 0, photoByteArray.size))}
 
     Surface(
         modifier = Modifier
@@ -98,13 +98,13 @@ fun PersonInfoScreen() {
                     permissionLauncher.launch(Manifest.permission.CAMERA)
                 }))
             {
-                if(people.intValue != -1){
-                        Image(
-                            bitmap = photo.value.asImageBitmap(),
-                            contentDescription = "PersonPhoto",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
+//                if(people.intValue != -1){
+//                        Image(
+//                            bitmap = photo.value.asImageBitmap(),
+//                            contentDescription = "PersonPhoto",
+//                            modifier = Modifier.fillMaxSize()
+//                        )
+//                    }
 //                result.value?.let { image ->
 //                    Image(
 //                        bitmap = image.asImageBitmap(),
@@ -164,6 +164,7 @@ fun PersonInfoScreen() {
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 fun updatePeopleData(peopleApi: People): Array<String>{
     var fullname = ""
     var birthdate = ""
@@ -178,7 +179,8 @@ fun updatePeopleData(peopleApi: People): Array<String>{
         phone = currentPeople.phone
         photo = currentPeople.photo
     }
-    Thread.sleep(2000)
+    while((fullname == "") or (birthdate== "") or (phone== "") or (photo == ""))
+    Thread.sleep(10)
     return arrayOf(fullname, birthdate, phone, photo)
 }
 

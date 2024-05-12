@@ -35,6 +35,7 @@ import com.example.quickidenti.components.TextFieldComponent
 import com.example.quickidenti.dto.client.clientAuth
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
+import com.example.quickidenti.utils.checkConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -84,20 +85,29 @@ fun SignInScreen(){
             ButtonComponent(
                 value = stringResource(id = R.string.sign_in),
                 action = {
+                    if(checkConnection()) {
                         CoroutineScope(Dispatchers.IO).launch {
-                            if(clientApi.authClient(clientAuth(emailValue.value, password.value))) {
+                            if (clientApi.authClient(
+                                    clientAuth(
+                                        emailValue.value,
+                                        password.value
+                                    )
+                                )
+                            ) {
                                 changeFail.value = false
                                 user.value = emailValue.value
                                 QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
-                            }
-                            else
+                            } else
                                 changeFail.value = true
-                                password.value = ""
+                            password.value = ""
                         }
                         sleep(300)
-                        if(changeFail.value)
+                        if (changeFail.value)
                             Toast.makeText(context, incorrectData, Toast.LENGTH_LONG).show()
+                    }else{
+                        Toast.makeText(context, "сервер выключен", Toast.LENGTH_LONG).show()
 
+                    }
                 })
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

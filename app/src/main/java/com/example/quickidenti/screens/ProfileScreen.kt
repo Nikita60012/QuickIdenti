@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +70,7 @@ fun ProfileScreen(){
     val upd = updateClientData(clientApi)
     val emailLabel = remember { mutableStateOf(upd[0])}
     val phoneLabel = remember { mutableStateOf(upd[1])}
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier

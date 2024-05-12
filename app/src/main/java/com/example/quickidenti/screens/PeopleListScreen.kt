@@ -59,6 +59,10 @@ import java.lang.Thread.sleep
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PeopleListScreen(){
+    val a = remember {
+        mutableStateOf(1)
+    }
+    //when ...
     var peoples: MutableList<PeopleList> = mutableListOf(PeopleList(0,"dummy"))
     val listApi = retrofit.create(People::class.java)
     CoroutineScope(Dispatchers.IO).launch {
@@ -108,6 +112,7 @@ fun PeopleListScreen(){
         QuickIdentiAppRouter.navigateTo(QuickIdentiAppRouter.historyScreenList[QuickIdentiAppRouter.lastHistoryIndex.value], false)
     }
 }
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SimpleLazyColumnScreen(element: MutableList<PeopleList>) {
     val elements by remember { mutableStateOf(element) }
