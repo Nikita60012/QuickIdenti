@@ -1,6 +1,6 @@
-package com.example.quickidenti.dto.People
+package com.example.quickidenti.dto.human
 
-data class PeopleInfo(
+data class HumanAdd(
     val fullname: String,
     val birthdate: String,
     val phone: String

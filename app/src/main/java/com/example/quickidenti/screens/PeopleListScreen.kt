@@ -2,6 +2,7 @@ package com.example.quickidenti.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,55 +58,73 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
 
+
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PeopleListScreen(){
-    val a = remember {
-        mutableStateOf(1)
-    }
-    //when ...
-    var peoples: MutableList<PeopleList> = mutableListOf(PeopleList(0,"dummy"))
-    val listApi = retrofit.create(People::class.java)
-    CoroutineScope(Dispatchers.IO).launch {
-        peoples = listApi.getPeoples(user.value)
 
-    }
-    sleep(100)
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(28.dp)
-    ){
-        val elements: MutableList<Element> =  mutableListOf(Element(0,"dummy"))
-        elements.removeAt(0)
-        for (i in 0..<peoples.size){
-            elements.add(Element(i, peoples[i].fullname))
+    val peoples = remember{ mutableListOf<PeopleList>()}
+    val dataReceived = remember{ mutableStateOf(false)}
+    val context = LocalContext.current
+    val humanDeleted = remember { mutableStateOf(false) }
+    val listApi = retrofit.create(People::class.java)
+    if(!dataReceived.value) {
+        CoroutineScope(Dispatchers.IO).launch {
+            peoples.addAll(listApi.getPeoples(user.value))
+            sleep(200)
+            dataReceived.value = true
         }
-        Column{
-            SimpleLazyColumnScreen(peoples)
-            Box(modifier = Modifier
-                .padding(5.dp)
-                .fillMaxSize(),
-                contentAlignment = Alignment.BottomEnd){
+    }
+    if(dataReceived.value) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(28.dp)
+        ) {
+            Column {
+                SimpleLazyColumnScreen(peoples,
+                    delete = {id ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            humanDeleted.value = listApi.delHuman(user.value, id)
+                            dataReceived.value = false
+                            peoples.clear()
+                        }
+                    })
+                if(humanDeleted.value){
+                    Toast.makeText(context, "Human deleted", Toast.LENGTH_SHORT).show()
+                    humanDeleted.value = false
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.BottomEnd
+            ) {
 
                 FloatingActionButton(modifier = Modifier
                     .widthIn(48.dp)
                     .heightIn(48.dp),
                     shape = RoundedCornerShape(50.dp),
-                    onClick = { /*TODO*/ }) {
-                    Box(modifier = Modifier
-                        .widthIn(48.dp)
-                        .heightIn(48.dp)
-                        .background(
-                            brush = Brush.radialGradient(listOf(Secondary, Primary)),
-                            shape = RoundedCornerShape(50.dp)
-                        ),
+                    onClick = {
+                        people.intValue = -1
+                        Log.i("add_new_human", "adding new human")
+                        QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)}) {
+                    Box(
+                        modifier = Modifier
+                            .widthIn(48.dp)
+                            .heightIn(48.dp)
+                            .background(
+                                brush = Brush.radialGradient(listOf(Secondary, Primary)),
+                                shape = RoundedCornerShape(50.dp)
+                            ),
                         contentAlignment = Alignment.Center
-                    ){
+                    ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Add worker")
                     }
-            }
+                }
             }
         }
     }
@@ -114,7 +134,8 @@ fun PeopleListScreen(){
 }
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SimpleLazyColumnScreen(element: MutableList<PeopleList>) {
+fun SimpleLazyColumnScreen(element: MutableList<PeopleList>,
+                           delete: (Int) -> Unit) {
     val elements by remember { mutableStateOf(element) }
     Box {
         LazyColumn {
@@ -122,7 +143,8 @@ fun SimpleLazyColumnScreen(element: MutableList<PeopleList>) {
                 PersonView(id = element.id,
                     title = element.fullname,
                     deleteClick = {id ->
-                    Log.i("Delete", "Man delete $id")
+                        Log.i("Delete", "Man delete $id")
+                        delete(id)
                 },
                     onItemClick = { id ->
                         Log.i("Click", "Man click $id")

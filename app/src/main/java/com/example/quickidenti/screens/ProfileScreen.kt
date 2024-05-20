@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,11 +65,17 @@ fun ProfileScreen(){
     val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
     val exitFromApp = stringResource(id = R.string.exit_from_app)
     val changesSavedStatus = remember { mutableStateOf(false)}
+    val emailLabel = remember { mutableStateOf("")}
+    val phoneLabel = remember { mutableStateOf("")}
     val clientApi = retrofit.create(Client::class.java)
-    val upd = updateClientData(clientApi)
-    val emailLabel = remember { mutableStateOf(upd[0])}
-    val phoneLabel = remember { mutableStateOf(upd[1])}
-    val scope = rememberCoroutineScope()
+
+    CoroutineScope(Dispatchers.IO).launch {
+        val client = clientApi.infoClient(user.value)
+        sleep(200)
+        emailLabel.value = client.email
+        phoneLabel.value = client.phone
+    }
+
 
     Surface(
         modifier = Modifier
@@ -148,12 +153,14 @@ fun ProfileScreen(){
                                       oldPassword.value,
                                       phoneValue.value))
                                 }
-                            sleep(100)
                             if (changesSavedStatus.value) {
                                 user.value = emailValue.value
-                                val changesData = updateClientData(clientApi)
-                                emailLabel.value = changesData[0]
-                                phoneLabel.value = changesData[1]
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val client = clientApi.infoClient(user.value)
+
+                                    emailLabel.value = client.email
+                                    phoneLabel.value = client.phone
+                                }
                                 Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
                                 oldPassword.value = ""
                                 newPassword.value = ""
@@ -186,18 +193,6 @@ fun ProfileScreen(){
     }
 }
 
-fun updateClientData(clientApi: Client): Array<String>{
-    var email = ""
-    var phone = ""
-    CoroutineScope(Dispatchers.IO).launch {
-        val client = clientApi.infoClient(user.value)
-        sleep(100)
-        email = client.email
-        phone = client.phone
-    }
-    sleep(200)
-    return arrayOf(email, phone)
-}
 @Preview
 @Composable
 fun ProfileScreenPreview(){

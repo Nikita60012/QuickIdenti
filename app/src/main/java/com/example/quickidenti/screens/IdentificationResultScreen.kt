@@ -44,14 +44,14 @@ fun IdentificationResultScreen(){
             ) {
                 Box(modifier = Modifier
                     .height(220.dp)
-                    .width(160.dp)
+                    .width(150.dp)
                     .background(
                         brush = Brush.linearGradient(listOf(Primary, Secondary))
                     ))
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(30.dp))
                 Box(modifier = Modifier
                     .height(220.dp)
-                    .width(160.dp)
+                    .width(150.dp)
                     .background(
                         brush = Brush.linearGradient(listOf(Primary, Secondary))
                     ))

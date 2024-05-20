@@ -39,7 +39,6 @@ import com.example.quickidenti.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Thread.sleep
 import java.util.regex.Pattern.matches
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -108,12 +107,12 @@ fun SignUpScreen(){
                     if(password.value == passwordToSubmit.value) {
                         CoroutineScope(Dispatchers.IO).launch {
                             isSuccess.value = clientApi.regClient(ClientReg(emailValue.value, password.value, phoneValue.value))
+                            if (isSuccess.value){
+                                user.value = emailValue.value
+                                QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                            }
                         }
-                        sleep(500)
-                        if (isSuccess.value){
-                            user.value = emailValue.value
-                            QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
-                        }else{
+                        if (!isSuccess.value){
                             Toast.makeText(context, "Пользователь с этой почтой уже существует", Toast.LENGTH_LONG).show()
                         }
                     }

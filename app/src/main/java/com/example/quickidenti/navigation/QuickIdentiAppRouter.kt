@@ -27,8 +27,10 @@ object QuickIdentiAppRouter{
             historyScreenList.add(currentScreen.value)
             lastHistoryIndex.value++
         }else{
-            if(historyScreenList.isNotEmpty()) {historyScreenList.removeAt(lastHistoryIndex.value)}
-            if (lastHistoryIndex.value != 0){lastHistoryIndex.value--}
+            if(historyScreenList.isNotEmpty())
+            {historyScreenList.removeAt(lastHistoryIndex.value)}
+            if (lastHistoryIndex.value != -1)
+            {lastHistoryIndex.value--}
         }
         currentScreen.value = destination
     }
