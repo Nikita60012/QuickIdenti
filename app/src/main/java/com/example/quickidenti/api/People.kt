@@ -5,7 +5,6 @@ import com.example.quickidenti.dto.People.PeopleInfo
 import com.example.quickidenti.dto.People.PeopleList
 import com.example.quickidenti.dto.human.HumanAdd
 import okhttp3.MultipartBody
-import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
@@ -23,8 +22,9 @@ interface People {
     @DELETE("/edit_workers/del/{user_email}/{human_id}")
     suspend fun delHuman(@Path("user_email") user_email: String, @Path("human_id") human_id: Int): Boolean
 
+    @Multipart
     @POST("/edit_workers/add_photo/photo")
-    suspend fun photoAdd(@Body photo: MultipartBody.Part): Boolean
+    suspend fun photoAdd(@Part file: MultipartBody.Part?): Boolean
 
     @Multipart
     @POST("/edit_workers/add/{user_email}")

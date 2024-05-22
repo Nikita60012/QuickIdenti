@@ -1,11 +1,13 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.quickidenti.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.ContextWrapper
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -60,15 +62,12 @@ import com.example.quickidenti.ui.theme.Secondary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
 import java.lang.Thread.sleep
-import java.util.UUID
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -80,14 +79,26 @@ fun PersonInfoScreen() {
     val changesSaved = stringResource(id = R.string.changes_saved)
     val context = LocalContext.current
     val result = remember { mutableStateOf<Bitmap?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { result.value = it }
+    val newPhoto = remember { mutableStateOf<Uri>(Uri.EMPTY)}
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        val bytes = ByteArrayOutputStream()
+        it?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path: String = MediaStore.Images.Media.insertImage(
+            context.contentResolver,
+            it,
+            "photo",
+            null
+        )
+        result.value = it
+        newPhoto.value = Uri.parse(path)}
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { if (it) {
             launcher.launch()
         }
     }
-    val newPhoto = remember { mutableStateOf<Bitmap?>(null)}
+
+    val tempPhoto = remember { mutableStateOf<Bitmap?>(null)}
     val contentReceived = remember { mutableStateOf(false)}
     val fullName = remember { mutableStateOf("")}
     val birthdateValue = remember{ mutableStateOf("")}
@@ -144,7 +155,7 @@ fun PersonInfoScreen() {
                         }
                     }
                     result.value?.let { image ->
-                        newPhoto.value = image
+                        tempPhoto.value = image
                         Image(
                             bitmap = image.asImageBitmap(),
                             contentDescription = "PersonPhoto",
@@ -183,25 +194,27 @@ fun PersonInfoScreen() {
                     ) {
                         Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
                         CoroutineScope(Dispatchers.IO).launch {
-                            val wrapper = ContextWrapper(context)
-                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
-                            file = File(file,"${UUID.randomUUID()}.jpg")
-                            try{
-                                val stream:OutputStream = FileOutputStream(file)
-                                newPhoto.value?.compress(Bitmap.CompressFormat.JPEG,100,stream)
-                                stream.flush()
-                                stream.close()
-                            }catch (e: IOException){
-                                e.printStackTrace()
+//                            val wrapper = ContextWrapper(context)
+//                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
+//                            file = File(file,"${UUID.randomUUID()}.jpg")
+//                            val bytes = ByteArrayOutputStream()
+//                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+//                            val path: String = MediaStore.Images.Media.insertImage(
+//                                context.contentResolver,
+//                                tempPhoto.value,
+//                                "Title",
+//                                null
+//                            )
+//                            val uri: Uri = Uri.parse(path)
+//                            newPhoto.value = uri.path?.let { File(it) }
+                            val jpegBytes = newPhoto.value.path?.let { File(it).readBytes() }
+                            val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
+                            val body = requestBody?.let {
+                                MultipartBody.Part.createFormData("photo", "photo.jpg",
+                                    it
+                                )
                             }
-                            val fileBody = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
-                            val filePart: MultipartBody.Part = MultipartBody.Part.createFormData(
-                                "file",
-                                "your_bitmap_file.bmp",
-                                fileBody
-                            )
-//                            val pht = MediaType.pars)
-                            val photoAddCheck = humanApi.photoAdd(filePart)
+                            val photoAddCheck = humanApi.photoAdd(body)
                             Log.i("check", photoAddCheck.toString())
 //                            val addInfo = HumanAdd(
 //                                    fullname = fullName.value,
