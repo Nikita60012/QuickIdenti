@@ -6,8 +6,8 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface Subscribe {
-    @POST("/subscribes/buy_subscribe/{client_email}")
-    suspend fun buySubscribe(@Path("client_email") client_email: String,
+    @POST("/subscribe/buy_subscribe/{client_token}")
+    suspend fun buySubscribe(@Path("client_token") clientToken: String,
                              @Body data: SubscribeBuy): Boolean
 
 

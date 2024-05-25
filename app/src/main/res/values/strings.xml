@@ -40,4 +40,9 @@
     <string name="profile">Profile</string>
     <string name="subscribe">Subscribe</string>
     <string name="logout">Logout</string>
+    <string name="subscribe_bought">The subscription has been issued</string>
+    <string name="error_happened">An error has occurred</string>
+    <string name="server">There is no connection to the server</string>
+    <string name="internet">There is no internet connection</string>
+    <string name="email_already_exist">A user with such an email already exists</string>
 </resources>

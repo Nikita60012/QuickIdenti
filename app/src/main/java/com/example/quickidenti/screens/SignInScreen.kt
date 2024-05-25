@@ -1,7 +1,6 @@
 package com.example.quickidenti.screens
 import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,14 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.ClickableTextComponent
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
-import com.example.quickidenti.dto.client.clientAuth
-import com.example.quickidenti.exeptions.exeptions
+import com.example.quickidenti.dto.client.request.clientAuth
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +48,6 @@ fun SignInScreen(){
     val password = rememberSaveable{ mutableStateOf("") }
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val context = LocalContext.current
-    val incorrectData = stringResource(id = R.string.email_or_pass_incorrect)
     val clientApi = retrofit.create(com.example.quickidenti.api.Client::class.java)
     val changeFail = remember { (mutableStateOf(false)) }
 
@@ -69,14 +67,14 @@ fun SignInScreen(){
                 heightIn = 40)
             Spacer(modifier = Modifier.height(40.dp))
             TextFieldComponent(
-                labelValue = "${stringResource(id = R.string.email)} (123@mail.com)",
+                labelValue = stringResource(id = R.string.email),
                 painterResource = painterResource(id = R.drawable.email_outline),
                 textValue = emailValue.value,
                 onValueChange = {emailValue.value = it},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
             PasswordTextFieldComponent(
-                labelValue = "${stringResource(id = R.string.password)} 123",
+                labelValue = stringResource(id = R.string.password),
                 painterResource = painterResource(id = R.drawable.lock_outline),
                 password = password.value,
                 onPassChange = {password.value = it})
@@ -88,26 +86,26 @@ fun SignInScreen(){
                 action = {
                         CoroutineScope(Dispatchers.IO).launch {
                             try{
-                                if (clientApi.authClient(
-                                        clientAuth(
-                                            emailValue.value,
-                                            password.value
-                                        )
+                                val result = clientApi.authClient(
+                                    clientAuth(
+                                        emailValue.value,
+                                        password.value
                                     )
-                                ) {
+                                )
+                                if (result.enter) {
                                     changeFail.value = false
-                                    user.value = emailValue.value
+                                    token.value = result.token
                                     QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
                                 } else
                                     changeFail.value = true
                                 password.value = ""
                             }catch (timeOut: SocketTimeoutException){
                                 Log.i("serverError", "server not found")
-                                exeptions(context, "server")
+                                messages(context, "server")
                             }
                         }
                         if (changeFail.value)
-                            Toast.makeText(context, incorrectData, Toast.LENGTH_LONG).show()
+                            messages(context, "email_or_pass_incorrect")
                 })
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

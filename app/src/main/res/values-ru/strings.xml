@@ -40,4 +40,9 @@
     <string name="profile">Профиль</string>
     <string name="subscribe">Подписка</string>
     <string name="logout">Выход из аккаунта</string>
+    <string name="subscribe_bought">Подписка оформлена</string>
+    <string name="error_happened">Произошла ошибка</string>
+    <string name="server">Отсутствует соединение с сервером</string>
+    <string name="internet">Отсутствует подключение к интернету</string>
+    <string name="email_already_exist">Пользователь с такой почтой уже существует</string>
 </resources>

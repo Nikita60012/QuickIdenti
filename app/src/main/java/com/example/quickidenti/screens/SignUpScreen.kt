@@ -1,7 +1,7 @@
 package com.example.quickidenti.screens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,18 +27,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.ClickableTextComponent
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
-import com.example.quickidenti.dto.client.ClientReg
+import com.example.quickidenti.dto.client.request.ClientReg
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 import java.util.regex.Pattern.matches
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -51,8 +53,6 @@ fun SignUpScreen(){
     val passwordToSubmit = remember { mutableStateOf("") }
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val phoneValue = rememberSaveable{ mutableStateOf("")}
-    val passwordsAreNotEquals = stringResource(id = R.string.passwords_are_not_equals)
-    val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
     val clientApi = retrofit.create(com.example.quickidenti.api.Client::class.java)
 
 
@@ -106,20 +106,33 @@ fun SignUpScreen(){
                     && matches("(\\+|^)\\d{11}", phoneValue.value))
                     if(password.value == passwordToSubmit.value) {
                         CoroutineScope(Dispatchers.IO).launch {
-                            isSuccess.value = clientApi.regClient(ClientReg(emailValue.value, password.value, phoneValue.value))
-                            if (isSuccess.value){
-                                user.value = emailValue.value
-                                QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                            try {
+                                val result = clientApi.regClient(
+                                    ClientReg(
+                                        emailValue.value,
+                                        password.value,
+                                        phoneValue.value
+                                    )
+                                )
+                                isSuccess.value = result.enter
+                                if (isSuccess.value) {
+                                    token.value = emailValue.value
+                                    QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                                }
+                            }catch (timeOut: SocketTimeoutException){
+                            Log.i("serverError", "server not found")
+                            messages(context, "server")
                             }
                         }
                         if (!isSuccess.value){
-                            Toast.makeText(context, "Пользователь с этой почтой уже существует", Toast.LENGTH_LONG).show()
+                            Log.i("emailAlreadyExist", "email already exist")
+                            messages(context, "email_already_exist")
                         }
                     }
                     else
-                        Toast.makeText(context, passwordsAreNotEquals, Toast.LENGTH_LONG).show()
-                    else
-                    Toast.makeText(context, enteringDataIncorrect, Toast.LENGTH_LONG).show()
+                        messages(context, "passwords_are_not_equals")
+                else
+                    messages(context, "entering_data_incorrect")
             }
             Spacer(modifier = Modifier.height(100.dp))
             ClickableTextComponent(

@@ -13,22 +13,22 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface People {
-    @GET("/edit_workers/get_all/{user_email}")
-    suspend fun getPeoples(@Path("user_email") user_email: String): MutableList<PeopleList>
+    @GET("/edit_people/people_get/{client_token}")
+    suspend fun getPeoples(@Path("client_token") clientToken: String): MutableList<PeopleList>
 
-    @GET("/edit_workers/get/{user_email}/{worker_id}")
-    suspend fun getHuman(@Path("user_email") user_email: String, @Path("worker_id") worker_id: Int): PeopleInfo
+    @GET("/edit_people/human_get/{client_token}/{human_id}")
+    suspend fun getHuman(@Path("client_token") clientToken: String, @Path("human_id") humanId: Int): PeopleInfo
 
-    @DELETE("/edit_workers/del/{user_email}/{human_id}")
-    suspend fun delHuman(@Path("user_email") user_email: String, @Path("human_id") human_id: Int): Boolean
+    @DELETE("/edit_people/human_del/{client_token}/{human_id}")
+    suspend fun delHuman(@Path("client_token") clientToken: String, @Path("human_id") humanId: Int): Boolean
 
     @Multipart
-    @POST("/edit_workers/add_photo/photo")
+    @POST("/edit_people/add_photo/photo")
     suspend fun photoAdd(@Part file: MultipartBody.Part?): Boolean
 
     @Multipart
-    @POST("/edit_workers/add/{user_email}")
-    suspend fun addHuman(@Path("user_email") user_email: String,
+    @POST("/edit_people/human_add/{client_token}")
+    suspend fun addHuman(@Path("client_token") clientToken: String,
                          @Part("addHuman") addHuman: HumanAdd,
                          @Part("photo") photo: Bitmap): Boolean
 }

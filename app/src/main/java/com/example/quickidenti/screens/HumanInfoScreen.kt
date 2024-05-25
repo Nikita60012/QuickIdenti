@@ -50,10 +50,11 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.quickidenti.R
 import com.example.quickidenti.api.People
-import com.example.quickidenti.app.people
+import com.example.quickidenti.app.humanId
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
+import com.example.quickidenti.components.LoadingComponent
 import com.example.quickidenti.components.TextFieldComponent
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
@@ -80,7 +81,7 @@ fun PersonInfoScreen() {
     val context = LocalContext.current
     val result = remember { mutableStateOf<Bitmap?>(null) }
     val newPhoto = remember { mutableStateOf<Uri>(Uri.EMPTY)}
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
         val bytes = ByteArrayOutputStream()
         it?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
         val path: String = MediaStore.Images.Media.insertImage(
@@ -105,9 +106,9 @@ fun PersonInfoScreen() {
     val phoneValue = remember{ mutableStateOf("")}
     val photo = remember{ mutableStateOf<Bitmap?>(null)}
     val humanApi = retrofit.create(People::class.java)
-    if(people.intValue != -1) {
+    if(humanId.intValue != -1) {
         CoroutineScope(Dispatchers.IO).launch {
-            val currentPeople = humanApi.getHuman(user.value, people.intValue)
+            val currentPeople = humanApi.getHuman(token.value, humanId.intValue)
             sleep(100)
             fullName.value = currentPeople.fullname
             birthdateValue.value = currentPeople.birthdate
@@ -122,7 +123,7 @@ fun PersonInfoScreen() {
         }
     }
 
-    if (contentReceived.value or (people.intValue == -1)) {
+    if (contentReceived.value or (humanId.intValue == -1)) {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -145,7 +146,7 @@ fun PersonInfoScreen() {
                     })
                 )
                 {
-                    if (people.intValue != -1) {
+                    if (humanId.intValue != -1) {
                         photo.value?.let {
                             Image(
                                 bitmap = it.asImageBitmap(),
@@ -193,6 +194,14 @@ fun PersonInfoScreen() {
                             .padding(5.dp)
                     ) {
                         Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
+                        val file = newPhoto.value.path?.let { File(it) }
+                        val jpegBytes = file?.readBytes()
+                        val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
+                        val body = requestBody?.let {
+                            MultipartBody.Part.createFormData("photo", "photo.jpg",
+                                it
+                            )
+                        }
                         CoroutineScope(Dispatchers.IO).launch {
 //                            val wrapper = ContextWrapper(context)
 //                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
@@ -207,13 +216,7 @@ fun PersonInfoScreen() {
 //                            )
 //                            val uri: Uri = Uri.parse(path)
 //                            newPhoto.value = uri.path?.let { File(it) }
-                            val jpegBytes = newPhoto.value.path?.let { File(it).readBytes() }
-                            val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
-                            val body = requestBody?.let {
-                                MultipartBody.Part.createFormData("photo", "photo.jpg",
-                                    it
-                                )
-                            }
+
                             val photoAddCheck = humanApi.photoAdd(body)
                             Log.i("check", photoAddCheck.toString())
 //                            val addInfo = HumanAdd(
@@ -237,6 +240,15 @@ fun PersonInfoScreen() {
                 }
 
             }
+        }
+    }else{
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(28.dp)
+        ) {
+            LoadingComponent()
         }
     }
     BackHandler(enabled = true){

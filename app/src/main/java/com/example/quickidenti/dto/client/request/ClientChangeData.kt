@@ -1,4 +1,4 @@
-package com.example.quickidenti.dto.client
+package com.example.quickidenti.dto.client.request
 
 data class ClientChangeData(
     var email: String,

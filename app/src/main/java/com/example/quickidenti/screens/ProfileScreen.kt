@@ -1,7 +1,7 @@
 package com.example.quickidenti.screens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -32,18 +32,21 @@ import com.example.quickidenti.MainActivity
 import com.example.quickidenti.R
 import com.example.quickidenti.api.Client
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
+import com.example.quickidenti.components.LoadingComponent
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
-import com.example.quickidenti.dto.client.ClientChangeData
+import com.example.quickidenti.dto.client.request.ClientChangeData
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
+import java.net.SocketTimeoutException
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
@@ -51,131 +54,162 @@ import kotlin.system.exitProcess
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @Composable
 fun ProfileScreen(){
-    val backCount = remember { mutableIntStateOf(0) }
+    val backCount = remember { mutableIntStateOf(1) }
     val context = LocalContext.current
     val newPassword = remember { mutableStateOf("") }
     val passwordToSubmit = remember { mutableStateOf("")}
     val oldPassword = remember { mutableStateOf("")}
     val emailValue = rememberSaveable{ mutableStateOf("") }
     val phoneValue = rememberSaveable{ mutableStateOf("")}
-    val changesSaved = stringResource(id = R.string.changes_saved)
-    val currentPasswordIncorrect = stringResource(id = R.string.current_password_incorrect)
-    val newPassDuplicateCurrent = stringResource(id = R.string.new_pass_duplicate_current)
-    val passwordsAreNotEquals =  stringResource(id = R.string.passwords_are_not_equals)
-    val enteringDataIncorrect = stringResource(id = R.string.entering_data_incorrect)
-    val exitFromApp = stringResource(id = R.string.exit_from_app)
     val changesSavedStatus = remember { mutableStateOf(false)}
     val emailLabel = remember { mutableStateOf("")}
     val phoneLabel = remember { mutableStateOf("")}
+    val dataReceived = remember { mutableStateOf(false)}
     val clientApi = retrofit.create(Client::class.java)
 
     CoroutineScope(Dispatchers.IO).launch {
-        val client = clientApi.infoClient(user.value)
-        sleep(200)
-        emailLabel.value = client.email
-        phoneLabel.value = client.phone
+        try {
+            val client = clientApi.infoClient(token.value)
+            sleep(200)
+            emailLabel.value = client.email
+            phoneLabel.value = client.phone
+            dataReceived.value = true
+        }catch (timeOut: SocketTimeoutException){
+            Log.i("serverError", "server not found")
+            messages(context, "server")
+        }
     }
 
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(28.dp)
-    ) {
-        Column(
+    if(dataReceived.value) {
+        Surface(
             modifier = Modifier
-                .verticalScroll(ScrollState(0))
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.Start
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(28.dp)
         ) {
-            TextFieldComponent(
-                labelValue = emailLabel.value,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                textValue = emailValue.value,
-                onValueChange = {emailValue.value = it},
-                painterResource = painterResource(
-                    id = R.drawable.email_outline
+            Column(
+                modifier = Modifier
+                    .verticalScroll(ScrollState(0))
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.Start
+            ) {
+                TextFieldComponent(
+                    labelValue = emailLabel.value,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    textValue = emailValue.value,
+                    onValueChange = { emailValue.value = it },
+                    painterResource = painterResource(
+                        id = R.drawable.email_outline
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            TextFieldComponent(
-                labelValue = phoneLabel.value,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                textValue = phoneValue.value,
-                onValueChange = {phoneValue.value = it},
-                painterResource = painterResource(
-                    id = R.drawable.phone_outline
+                Spacer(modifier = Modifier.height(20.dp))
+                TextFieldComponent(
+                    labelValue = phoneLabel.value,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    textValue = phoneValue.value,
+                    onValueChange = { phoneValue.value = it },
+                    painterResource = painterResource(
+                        id = R.drawable.phone_outline
+                    )
                 )
-            )
 
-            Spacer(modifier = Modifier.height(40.dp))
-            TextComponent(value = "${stringResource(id = R.string.days_left)}: 90", textAlign = TextAlign.Start)
-            Spacer(modifier = Modifier.height(10.dp))
-            TextComponent(value = "${stringResource(id = R.string.slots)}: 30/50", textAlign = TextAlign.Start)
-            Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(40.dp))
+                TextComponent(
+                    value = "${stringResource(id = R.string.days_left)}: 90",
+                    textAlign = TextAlign.Start
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                TextComponent(
+                    value = "${stringResource(id = R.string.slots)}: 30/50",
+                    textAlign = TextAlign.Start
+                )
+                Spacer(modifier = Modifier.height(40.dp))
 
-            PasswordTextFieldComponent(
-                labelValue = stringResource(id = R.string.new_password),
-                painterResource = painterResource(id = R.drawable.lock_outline),
-                password = newPassword.value,
-                onPassChange = {
-                    newPassword.value = it
-                }
-            )
-            PasswordTextFieldComponent(
-                labelValue = stringResource(id = R.string.password_to_submit),
-                painterResource = painterResource(id = R.drawable.lock_outline),
-                password = passwordToSubmit.value,
-                onPassChange = {
-                    passwordToSubmit.value = it
-                }
-            )
-            Spacer(modifier = Modifier.height(50.dp))
-            PasswordTextFieldComponent(
-                labelValue = stringResource(id = R.string.old_password),
-                painterResource = painterResource(id = R.drawable.lock_outline),
-                password = oldPassword.value,
-                onPassChange = {
-                    oldPassword.value = it
-                }
-            )
-            Spacer(modifier = Modifier.height(50.dp))
-            ButtonComponent(value = stringResource(id = R.string.save_changes)) {
-                if(Pattern.matches("(.+@)((mail\\.(com|ru))|(yandex\\.ru))", emailValue.value)
-                    && Pattern.matches("(\\+|^)\\d{11}", phoneValue.value)){
-                    if (newPassword.value == passwordToSubmit.value) {
-                        if(newPassword.value != oldPassword.value) {
+                PasswordTextFieldComponent(
+                    labelValue = stringResource(id = R.string.new_password),
+                    painterResource = painterResource(id = R.drawable.lock_outline),
+                    password = newPassword.value,
+                    onPassChange = {
+                        newPassword.value = it
+                    }
+                )
+                PasswordTextFieldComponent(
+                    labelValue = stringResource(id = R.string.password_to_submit),
+                    painterResource = painterResource(id = R.drawable.lock_outline),
+                    password = passwordToSubmit.value,
+                    onPassChange = {
+                        passwordToSubmit.value = it
+                    }
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                PasswordTextFieldComponent(
+                    labelValue = stringResource(id = R.string.old_password),
+                    painterResource = painterResource(id = R.drawable.lock_outline),
+                    password = oldPassword.value,
+                    onPassChange = {
+                        oldPassword.value = it
+                    }
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                ButtonComponent(value = stringResource(id = R.string.save_changes)) {
+                    if ((Pattern.matches(
+                            "(.+@)((mail\\.(com|ru))|(yandex\\.ru))",
+                            emailValue.value
+                        ) || emailValue.value == "")
+                        && (Pattern.matches(
+                            "(\\+|^)\\d{11}",
+                            phoneValue.value
+                        ) || phoneValue.value == "")
+                    ) {
+                        if (newPassword.value == passwordToSubmit.value) {
+                            if (newPassword.value != oldPassword.value) {
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    changesSavedStatus.value = clientApi.changeClientData(user.value,
-                                      ClientChangeData(emailValue.value,
-                                      newPassword.value,
-                                      oldPassword.value,
-                                      phoneValue.value))
+                                    try {
+                                        changesSavedStatus.value = clientApi.changeClientData(
+                                            token.value,
+                                            ClientChangeData(
+                                                emailValue.value,
+                                                newPassword.value,
+                                                oldPassword.value,
+                                                phoneValue.value
+                                            )
+                                        )
+                                        if (changesSavedStatus.value) {
+                                            dataReceived.value = false
+                                            val client = clientApi.infoClient(token.value)
+                                            emailLabel.value = client.email
+                                            phoneLabel.value = client.phone
+                                            messages(context, "changes_saved")
+                                            oldPassword.value = ""
+                                            newPassword.value = ""
+                                            passwordToSubmit.value = ""
+                                        } else {
+                                            messages(context, "current_password_incorrect")
+                                            oldPassword.value = ""
+                                        }
+                                        dataReceived.value = true
+                                    } catch (timeOut: SocketTimeoutException) {
+                                        Log.i("serverError", "server not found")
+                                        messages(context, "server")
+                                    }
                                 }
-                            if (changesSavedStatus.value) {
-                                user.value = emailValue.value
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    val client = clientApi.infoClient(user.value)
-
-                                    emailLabel.value = client.email
-                                    phoneLabel.value = client.phone
-                                }
-                                Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
-                                oldPassword.value = ""
-                                newPassword.value = ""
-                                passwordToSubmit.value = ""
-                            }else{
-                                Toast.makeText(context, currentPasswordIncorrect, Toast.LENGTH_LONG).show()
-                                oldPassword.value = ""
-                            }
-                        }else
-                            Toast.makeText(context, newPassDuplicateCurrent, Toast.LENGTH_LONG).show()
-                    }else
-                        Toast.makeText(context, passwordsAreNotEquals, Toast.LENGTH_LONG).show()
-                }else
-                    Toast.makeText(context, enteringDataIncorrect, Toast.LENGTH_LONG).show()
+                            } else
+                                messages(context, "new_pass_duplicate_current")
+                        } else
+                            messages(context, "passwords_are_not_equals")
+                    } else
+                        messages(context, "entering_data_incorrect")
+                }
             }
+        }
+    }else{
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(28.dp)
+        ) {
+            LoadingComponent()
         }
     }
     BackHandler(enabled = true) {
@@ -185,10 +219,16 @@ fun ProfileScreen(){
             if(backCount.intValue == 2){
                 val activity = MainActivity()
                 activity.finish()
-                exitProcess(0)
+                val exitApi = retrofit.create(Client::class.java)
+                CoroutineScope(Dispatchers.IO).launch{
+                    exitApi.clientExit(token.value)
+                    exitProcess(0)
+                }
+
             }
+            if(backCount.intValue == 1)
+                messages(context, "exit_from_app")
             backCount.intValue++
-            Toast.makeText(context, exitFromApp, Toast.LENGTH_SHORT).show()
         }
     }
 }

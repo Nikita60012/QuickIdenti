@@ -1,7 +1,7 @@
 package com.example.quickidenti.screens
 
 import android.os.Build
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -30,10 +30,11 @@ import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
 import com.example.quickidenti.api.Subscribe
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.dto.subscribe.SubscribeBuy
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.PrimarySlider
@@ -42,7 +43,7 @@ import com.example.quickidenti.ui.theme.SecondarySlider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Thread.sleep
+import java.net.SocketTimeoutException
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -104,15 +105,22 @@ fun SubscribeScreen(){
             Spacer(modifier = Modifier.height(30.dp))
             ButtonComponent(value = stringResource(id = R.string.buy)) {
                 CoroutineScope(Dispatchers.IO).launch {
-                   isSuccess.value = subscribeApi.buySubscribe(user.value, SubscribeBuy(
-                       days = daysSliderPosition.toInt(),
-                       slots = slotsSliderPosition.toInt()))
+                    try {
+                        isSuccess.value = subscribeApi.buySubscribe(
+                            token.value, SubscribeBuy(
+                                days = daysSliderPosition.toInt(),
+                                slots = slotsSliderPosition.toInt()
+                            )
+                        )
+                    }catch (timeOut: SocketTimeoutException){
+                        Log.i("serverError", "server not found")
+                        messages(context, "server")
+                    }
                 }
-                sleep(500)
                 if(isSuccess.value){
-                    Toast.makeText(context, "Подписка оформлена", Toast.LENGTH_SHORT).show()
+                    messages(context, "subscribe_bought")
                 }else{
-                    Toast.makeText(context, "Произошла ошибка", Toast.LENGTH_SHORT).show()
+                    messages(context, "error_happened")
                 }
             }
         }

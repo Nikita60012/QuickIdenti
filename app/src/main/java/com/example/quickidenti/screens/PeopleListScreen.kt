@@ -45,10 +45,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quickidenti.api.People
-import com.example.quickidenti.app.people
+import com.example.quickidenti.app.humanId
 import com.example.quickidenti.app.retrofit
-import com.example.quickidenti.app.user
+import com.example.quickidenti.app.token
+import com.example.quickidenti.components.LoadingComponent
 import com.example.quickidenti.dto.People.PeopleList
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import com.example.quickidenti.ui.theme.Primary
@@ -57,7 +59,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
-
+import java.net.SocketTimeoutException
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -71,9 +73,14 @@ fun PeopleListScreen(){
     val listApi = retrofit.create(People::class.java)
     if(!dataReceived.value) {
         CoroutineScope(Dispatchers.IO).launch {
-            peoples.addAll(listApi.getPeoples(user.value))
-            sleep(200)
-            dataReceived.value = true
+            try {
+                peoples.addAll(listApi.getPeoples(token.value))
+                sleep(200)
+                dataReceived.value = true
+            }catch (timeOut: SocketTimeoutException){
+            Log.i("serverError", "server not found")
+            messages(context, "server")
+            }
         }
     }
     if(dataReceived.value) {
@@ -87,7 +94,7 @@ fun PeopleListScreen(){
                 SimpleLazyColumnScreen(peoples,
                     delete = {id ->
                         CoroutineScope(Dispatchers.IO).launch {
-                            humanDeleted.value = listApi.delHuman(user.value, id)
+                            humanDeleted.value = listApi.delHuman(token.value, id)
                             dataReceived.value = false
                             peoples.clear()
                         }
@@ -109,7 +116,7 @@ fun PeopleListScreen(){
                     .heightIn(48.dp),
                     shape = RoundedCornerShape(50.dp),
                     onClick = {
-                        people.intValue = -1
+                        humanId.intValue = -1
                         Log.i("add_new_human", "adding new human")
                         QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)}) {
                     Box(
@@ -126,6 +133,15 @@ fun PeopleListScreen(){
                     }
                 }
             }
+        }
+    }else{
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(28.dp)
+        ) {
+            LoadingComponent()
         }
     }
     BackHandler(enabled = true) {
@@ -148,7 +164,7 @@ fun SimpleLazyColumnScreen(element: MutableList<PeopleList>,
                 },
                     onItemClick = { id ->
                         Log.i("Click", "Man click $id")
-                        people.intValue = id
+                        humanId.intValue = id
                         QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
                 })
             }
