@@ -65,7 +65,6 @@ import java.net.SocketTimeoutException
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun PeopleListScreen(){
-
     val peoples = remember{ mutableListOf<PeopleList>()}
     val dataReceived = remember{ mutableStateOf(false)}
     val context = LocalContext.current

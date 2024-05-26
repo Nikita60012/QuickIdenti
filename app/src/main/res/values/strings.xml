@@ -29,7 +29,6 @@
     <string name="current_password_incorrect">Current password incorrect</string>
     <string name="new_pass_duplicate_current">New password must not duplicate current password</string>
     <string name="exit_from_app">With tap once more you will exit from app</string>
-    <string name="identification_result">Conclusion</string>
     <string name="back_to_identification">Back to identification</string>
     <string name="fullname">Fullname</string>
     <string name="birthdate">Birthdate</string>
@@ -45,4 +44,5 @@
     <string name="server">There is no connection to the server</string>
     <string name="internet">There is no internet connection</string>
     <string name="email_already_exist">A user with such an email already exists</string>
+    <string name="add_human_data">Add</string>
 </resources>

@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +55,7 @@ import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.LoadingComponent
 import com.example.quickidenti.components.TextFieldComponent
+import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
 import com.example.quickidenti.ui.theme.Primary
@@ -69,6 +69,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.Thread.sleep
+import java.net.SocketTimeoutException
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -77,7 +78,6 @@ import java.lang.Thread.sleep
 fun PersonInfoScreen() {
 
 
-    val changesSaved = stringResource(id = R.string.changes_saved)
     val context = LocalContext.current
     val result = remember { mutableStateOf<Bitmap?>(null) }
     val newPhoto = remember { mutableStateOf<Uri>(Uri.EMPTY)}
@@ -108,18 +108,23 @@ fun PersonInfoScreen() {
     val humanApi = retrofit.create(People::class.java)
     if(humanId.intValue != -1) {
         CoroutineScope(Dispatchers.IO).launch {
-            val currentPeople = humanApi.getHuman(token.value, humanId.intValue)
-            sleep(100)
-            fullName.value = currentPeople.fullname
-            birthdateValue.value = currentPeople.birthdate
-            phoneValue.value = currentPeople.phone
-            val loading = ImageLoader(context)
-            val request = ImageRequest.Builder(context)
-                .data("http:/10.0.2.2:8000/edit_workers/get_human_photo/15")
-                .build()
-            val image = (loading.execute(request) as SuccessResult).drawable
-            photo.value = image.toBitmap()
-            contentReceived.value = true
+            try {
+                val currentPeople = humanApi.getHuman(token.value, humanId.intValue)
+                sleep(100)
+                fullName.value = currentPeople.fullname
+                birthdateValue.value = currentPeople.birthdate
+                phoneValue.value = currentPeople.phone
+                val loading = ImageLoader(context)
+                val request = ImageRequest.Builder(context)
+                    .data("http:/10.0.2.2:8000/edit_people/get_human_photo/${token.value}/${humanId.intValue}")
+                    .build()
+                val image = (loading.execute(request) as SuccessResult).drawable
+                photo.value = image.toBitmap()
+                contentReceived.value = true
+            }catch (e: SocketTimeoutException){
+                Log.i("serverError", "server not found")
+                messages(context, "server")
+            }
         }
     }
 
@@ -135,28 +140,31 @@ fun PersonInfoScreen() {
                 verticalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.verticalScroll(ScrollState(0))
             ) {
-                Box(modifier = Modifier
-                    .height(220.dp)
-                    .width(200.dp)
-                    .background(
-                        brush = Brush.linearGradient(listOf(Primary, Secondary))
-                    )
-                    .clickable(onClick = {
-                        permissionLauncher.launch(Manifest.permission.CAMERA)
-                    })
+                Box(
+                    modifier = Modifier
+                        .height(220.dp)
+                        .width(200.dp)
+                        .background(
+                            brush = Brush.linearGradient(listOf(Primary, Secondary))
+                        )
+                        .clickable(onClick = {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        })
                 )
                 {
                     if (humanId.intValue != -1) {
                         photo.value?.let {
+                            val image = Bitmap.createScaledBitmap(it, 200, 220, true)
                             Image(
-                                bitmap = it.asImageBitmap(),
+                                bitmap = image.asImageBitmap(),
                                 contentDescription = "PersonPhoto",
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
-                    result.value?.let { image ->
-                        tempPhoto.value = image
+                    result.value?.let {
+                        tempPhoto.value = it
+                        val image = Bitmap.createScaledBitmap(it, 200, 220, true)
                         Image(
                             bitmap = image.asImageBitmap(),
                             contentDescription = "PersonPhoto",
@@ -185,60 +193,110 @@ fun PersonInfoScreen() {
                 )
                 Spacer(modifier = Modifier.height(60.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    ButtonComponent(
-                        value = stringResource(id = R.string.save),
-                        modifier = Modifier
-                            .width(200.dp)
-                            .heightIn(48.dp)
-                            .weight(1.5f)
-                            .padding(5.dp)
-                    ) {
-                        Toast.makeText(context, changesSaved, Toast.LENGTH_SHORT).show()
+                    if (humanId.intValue != -1) {
+                        ButtonComponent(
+                            value = stringResource(id = R.string.save),
+                            modifier = Modifier
+                                .width(200.dp)
+                                .heightIn(48.dp)
+                                .weight(1.5f)
+                                .padding(5.dp)
+                        ) {
+                            messages(context, "changes_saved")
+                        }
                         val file = newPhoto.value.path?.let { File(it) }
                         val jpegBytes = file?.readBytes()
                         val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
                         val body = requestBody?.let {
-                            MultipartBody.Part.createFormData("photo", "photo.jpg",
+                            MultipartBody.Part.createFormData(
+                                "photo", "photo.jpg",
                                 it
                             )
                         }
                         CoroutineScope(Dispatchers.IO).launch {
-//                            val wrapper = ContextWrapper(context)
-//                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
-//                            file = File(file,"${UUID.randomUUID()}.jpg")
-//                            val bytes = ByteArrayOutputStream()
-//                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-//                            val path: String = MediaStore.Images.Media.insertImage(
-//                                context.contentResolver,
-//                                tempPhoto.value,
-//                                "Title",
-//                                null
-//                            )
-//                            val uri: Uri = Uri.parse(path)
-//                            newPhoto.value = uri.path?.let { File(it) }
-
+////                            val wrapper = ContextWrapper(context)
+////                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
+////                            file = File(file,"${UUID.randomUUID()}.jpg")
+////                            val bytes = ByteArrayOutputStream()
+////                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+////                            val path: String = MediaStore.Images.Media.insertImage(
+////                                context.contentResolver,
+////                                tempPhoto.value,
+////                                "Title",
+////                                null
+////                            )
+////                            val uri: Uri = Uri.parse(path)
+////                            newPhoto.value = uri.path?.let { File(it) }
+//
                             val photoAddCheck = humanApi.photoAdd(body)
-                            Log.i("check", photoAddCheck.toString())
+//                            Log.i("check", photoAddCheck.toString())
 //                            val addInfo = HumanAdd(
 //                                    fullname = fullName.value,
 //                                    birthdate = birthdateValue.value,
 //                                    phone = phoneValue.value,
 //                                    )
-//                            humanApi.addHuman(user.value, addInfo, newPhoto.value!!)
+//                            humanApi.addHuman(token.value, addInfo, newPhoto.value!!)
+                        }
+                    } else {
+                        ButtonComponent(
+                            value = stringResource(id = R.string.add_human_data),
+                            modifier = Modifier
+                                .width(200.dp)
+                                .heightIn(48.dp)
+                                .weight(1.5f)
+                                .padding(5.dp)
+                        ) {
+                            messages(context, "changes_saved")
+                            val file = newPhoto.value.path?.let { File(it) }
+                            val jpegBytes = file?.readBytes()
+                            val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
+                            val body = requestBody?.let {
+                                MultipartBody.Part.createFormData(
+                                    "photo", "photo.jpg",
+                                    it
+                                )
+                            }
+                            CoroutineScope(Dispatchers.IO).launch {
+////                            val wrapper = ContextWrapper(context)
+////                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
+////                            file = File(file,"${UUID.randomUUID()}.jpg")
+////                            val bytes = ByteArrayOutputStream()
+////                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+////                            val path: String = MediaStore.Images.Media.insertImage(
+////                                context.contentResolver,
+////                                tempPhoto.value,
+////                                "Title",
+////                                null
+////                            )
+////                            val uri: Uri = Uri.parse(path)
+////                            newPhoto.value = uri.path?.let { File(it) }
+//
+                                val photoAddCheck = humanApi.photoAdd(body)
+//                            Log.i("check", photoAddCheck.toString())
+////                            val addInfo = HumanAdd(
+////                                    fullname = fullName.value,
+////                                    birthdate = birthdateValue.value,
+////                                    phone = phoneValue.value,
+////                                    )
+////                            humanApi.addHuman(user.value, addInfo, newPhoto.value!!)
+//                        }
+                            }
+                        }
+//
+//                    }
+                        ButtonComponent(
+                            value = stringResource(id = R.string.back),
+                            modifier = Modifier
+                                .width(200.dp)
+                                .heightIn(48.dp)
+                                .weight(1f)
+                                .padding(5.dp)
+                        ) {
+                            QuickIdentiAppRouter.navigateTo(Screen.PeopleListScreen, false)
                         }
                     }
-                    ButtonComponent(
-                        value = stringResource(id = R.string.back),
-                        modifier = Modifier
-                            .width(200.dp)
-                            .heightIn(48.dp)
-                            .weight(1f)
-                            .padding(5.dp)
-                    ) {
-                        QuickIdentiAppRouter.navigateTo(Screen.PeopleListScreen, false)
-                    }
-                }
 
+                }
             }
         }
     }else{

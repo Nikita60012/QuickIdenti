@@ -7,7 +7,7 @@
     <string name="sign_in">Войти</string>
     <string name="password_to_submit">Подтвердите пароль</string>
     <string name="phone_number">Телефон</string>
-    <string name="sign_up">Зарегестрироваться</string>
+    <string name="sign_up">Зарегистрироваться</string>
     <string name="subscribe_info">Выберите свою подписку</string>
     <string name="slots">Слоты</string>
     <string name="days">Дни</string>
@@ -29,7 +29,6 @@
     <string name="current_password_incorrect">Текущий пароль неверен</string>
     <string name="new_pass_duplicate_current">Новый пароль не должен совпадать с текущим</string>
     <string name="exit_from_app">При повторном нажатии вы выйдете из приложения</string>
-    <string name="identification_result">Вердикт</string>
     <string name="back_to_identification">Вернуться к идентификации</string>
     <string name="fullname">ФИО</string>
     <string name="birthdate">Дата рождения</string>
@@ -45,4 +44,5 @@
     <string name="server">Отсутствует соединение с сервером</string>
     <string name="internet">Отсутствует подключение к интернету</string>
     <string name="email_already_exist">Пользователь с такой почтой уже существует</string>
+    <string name="add_human_data">Добавить</string>
 </resources>

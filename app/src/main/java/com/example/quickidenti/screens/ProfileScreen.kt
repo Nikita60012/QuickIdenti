@@ -64,6 +64,9 @@ fun ProfileScreen(){
     val changesSavedStatus = remember { mutableStateOf(false)}
     val emailLabel = remember { mutableStateOf("")}
     val phoneLabel = remember { mutableStateOf("")}
+    val daysLeft = remember { mutableIntStateOf(0) }
+    val slots = remember { mutableIntStateOf(0)}
+    val slotsOccupied = remember { mutableIntStateOf(0)}
     val dataReceived = remember { mutableStateOf(false)}
     val clientApi = retrofit.create(Client::class.java)
 
@@ -73,6 +76,9 @@ fun ProfileScreen(){
             sleep(200)
             emailLabel.value = client.email
             phoneLabel.value = client.phone
+            slots.intValue = client.slots
+            slotsOccupied.intValue = client.slots_occupied
+            daysLeft.intValue = client.days
             dataReceived.value = true
         }catch (timeOut: SocketTimeoutException){
             Log.i("serverError", "server not found")
@@ -115,12 +121,12 @@ fun ProfileScreen(){
 
                 Spacer(modifier = Modifier.height(40.dp))
                 TextComponent(
-                    value = "${stringResource(id = R.string.days_left)}: 90",
+                    value = "${stringResource(id = R.string.days_left)}: ${daysLeft.intValue}",
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 TextComponent(
-                    value = "${stringResource(id = R.string.slots)}: 30/50",
+                    value = "${stringResource(id = R.string.slots)}: ${slotsOccupied.intValue}/${slots.intValue}",
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(40.dp))
@@ -183,6 +189,9 @@ fun ProfileScreen(){
                                             oldPassword.value = ""
                                             newPassword.value = ""
                                             passwordToSubmit.value = ""
+                                            slots.intValue = client.slots
+                                            slotsOccupied.intValue = client.slots_occupied
+                                            daysLeft.intValue = client.days
                                         } else {
                                             messages(context, "current_password_incorrect")
                                             oldPassword.value = ""
@@ -224,7 +233,6 @@ fun ProfileScreen(){
                     exitApi.clientExit(token.value)
                     exitProcess(0)
                 }
-
             }
             if(backCount.intValue == 1)
                 messages(context, "exit_from_app")
