@@ -1,5 +1,10 @@
 package com.example.quickidenti.components
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.util.Base64
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,27 +13,39 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
@@ -45,24 +62,35 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quickidenti.R
+import com.example.quickidenti.app.humanId
+import com.example.quickidenti.dto.People.PeopleList
+import com.example.quickidenti.navigation.QuickIdentiAppRouter
+import com.example.quickidenti.navigation.Screen
 import com.example.quickidenti.ui.theme.BgColor
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.Secondary
 import com.example.quickidenti.ui.theme.TextColor
 import com.example.quickidenti.ui.theme.TextLinkColor
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.math.absoluteValue
 
 @Composable
 fun TextComponent(value: String,
@@ -91,6 +119,7 @@ fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter?,
     textValue: String,
+    mask: MaskVisualTransformation = MaskVisualTransformation(""),
     onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default){
     if (painterResource != null)
@@ -107,6 +136,7 @@ fun TextFieldComponent(
             backgroundColor = BgColor
         ),
         keyboardOptions = keyboardOptions,
+        visualTransformation = mask,
         singleLine = true,
         onValueChange = onValueChange,
         leadingIcon = {
@@ -127,6 +157,7 @@ fun TextFieldComponent(
             backgroundColor = BgColor
         ),
         keyboardOptions = keyboardOptions,
+        visualTransformation = mask,
         singleLine = true,
         onValueChange = onValueChange
     )
@@ -307,25 +338,153 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 
 @Composable
 fun LoadingComponent(){
-    val infiniteTransition = rememberInfiniteTransition(label = "")
-    val angle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            tween(2000, easing = LinearEasing),
-            RepeatMode.Restart
-        ), label = ""
-    )
-    Column(modifier = Modifier
-        .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter= painterResource(R.drawable.loading),
-            contentDescription = "Loading",
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(28.dp)
+    ) {
+        val infiniteTransition = rememberInfiniteTransition(label = "")
+        val angle by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                tween(2000, easing = LinearEasing),
+                RepeatMode.Restart
+            ), label = ""
+        )
+        Column(
             modifier = Modifier
-                .height(128.dp)
-                .width(128.dp)
-                .rotate(angle))
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(R.drawable.loading),
+                contentDescription = "Loading",
+                modifier = Modifier
+                    .height(128.dp)
+                    .width(128.dp)
+                    .rotate(angle)
+            )
+        }
+    }
+}
+
+@SuppressLint("MutableCollectionMutableState")
+@Composable
+fun SimpleLazyColumnScreen(element: MutableList<PeopleList>,
+                           delete: (Int) -> Unit) {
+    val elements by remember { mutableStateOf(element) }
+    Box {
+        LazyColumn {
+            items(elements) { element ->
+                PersonView(id = element.id,
+                    title = element.fullname,
+                    deleteClick = {id ->
+                        Log.i("Delete", "Man delete $id")
+                        delete(id)
+                    },
+                    onItemClick = { id ->
+                        Log.i("Click", "Man click $id")
+                        humanId.intValue = id
+                        QuickIdentiAppRouter.navigateTo(Screen.PersonInfoScreen, true)
+                    })
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonView(id: Int,
+               title: String,
+               deleteClick: (Int) -> Unit,
+               onItemClick: (Int) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(6.dp)
+                .clickable {
+                    onItemClick(id)
+                }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Person",
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+            )
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Image(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .clickable {
+                        deleteClick(id)
+                    }
+            )
+
+        }
+    }
+}
+
+fun convertBitmap2File(context: Context, bitmap: Bitmap): String{
+    val f = File(context.cacheDir, "human_photo")
+    f.createNewFile()
+    val bos = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos)
+    val bitmapdata = bos.toByteArray()
+    val fos = FileOutputStream(f)
+    fos.write(bitmapdata)
+    fos.flush()
+    fos.close()
+    val base_str = Base64.encodeToString(bitmapdata, Base64.DEFAULT)
+    return base_str
+}
+
+class MaskVisualTransformation(private val mask: String): VisualTransformation {
+    private val specialSymbolsIndices = mask.indices.filter { mask[it] != 'X' }
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        var out = ""
+        var maskIndex = 0
+        text.forEach { char ->
+            while (specialSymbolsIndices.contains(maskIndex)) {
+                out += mask[maskIndex]
+                maskIndex++
+            }
+            out += char
+            maskIndex++
+        }
+        return TransformedText(AnnotatedString(out), offsetTranslator())
+    }
+
+    private fun offsetTranslator() = object: OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            val offsetValue = offset.absoluteValue
+            if (offsetValue == 0) return 0
+            var numberOfHashtags = 0
+            val masked = mask.takeWhile {
+                if (it == 'X') numberOfHashtags++
+                numberOfHashtags < offsetValue
+            }
+            return masked.length + 1
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            return mask.take(offset.absoluteValue).count { it == 'X' }
+        }
     }
 }

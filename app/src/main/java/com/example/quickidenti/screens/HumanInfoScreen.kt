@@ -1,13 +1,10 @@
-@file:Suppress("DEPRECATION")
 
 package com.example.quickidenti.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -29,6 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -41,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -54,7 +53,11 @@ import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.LoadingComponent
+import com.example.quickidenti.components.MaskVisualTransformation
 import com.example.quickidenti.components.TextFieldComponent
+import com.example.quickidenti.components.convertBitmap2File
+import com.example.quickidenti.dto.human.HumanAdd
+import com.example.quickidenti.dto.human.HumanUpdate
 import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
@@ -63,11 +66,6 @@ import com.example.quickidenti.ui.theme.Secondary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.lang.Thread.sleep
 import java.net.SocketTimeoutException
 
@@ -80,25 +78,14 @@ fun PersonInfoScreen() {
 
     val context = LocalContext.current
     val result = remember { mutableStateOf<Bitmap?>(null) }
-    val newPhoto = remember { mutableStateOf<Uri>(Uri.EMPTY)}
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-        val bytes = ByteArrayOutputStream()
-        it?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-        val path: String = MediaStore.Images.Media.insertImage(
-            context.contentResolver,
-            it,
-            "photo",
-            null
-        )
-        result.value = it
-        newPhoto.value = Uri.parse(path)}
+    val operationSuccess = remember { mutableStateOf(false)}
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { result.value = it}
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { if (it) {
             launcher.launch()
         }
     }
-
     val tempPhoto = remember { mutableStateOf<Bitmap?>(null)}
     val contentReceived = remember { mutableStateOf(false)}
     val fullName = remember { mutableStateOf("")}
@@ -182,14 +169,18 @@ fun PersonInfoScreen() {
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.birthdate),
                     textValue = birthdateValue.value,
-                    onValueChange = { birthdateValue.value = it },
-                    painterResource = null
+                    onValueChange = { if(it.length <= 8){ birthdateValue.value = it }},
+                    mask = MaskVisualTransformation("XX-XX-XXXX"),
+                    painterResource = null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                 )
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.phone_number),
                     textValue = phoneValue.value,
-                    onValueChange = { phoneValue.value = it },
-                    painterResource = null
+                    onValueChange = { if(it.length <= 10){ phoneValue.value = it }},
+                    mask = MaskVisualTransformation("+7(XXX) XXX-XX-XX"),
+                    painterResource = null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                 )
                 Spacer(modifier = Modifier.height(60.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -202,40 +193,35 @@ fun PersonInfoScreen() {
                                 .weight(1.5f)
                                 .padding(5.dp)
                         ) {
-                            messages(context, "changes_saved")
-                        }
-                        val file = newPhoto.value.path?.let { File(it) }
-                        val jpegBytes = file?.readBytes()
-                        val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
-                        val body = requestBody?.let {
-                            MultipartBody.Part.createFormData(
-                                "photo", "photo.jpg",
-                                it
-                            )
-                        }
-                        CoroutineScope(Dispatchers.IO).launch {
-////                            val wrapper = ContextWrapper(context)
-////                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
-////                            file = File(file,"${UUID.randomUUID()}.jpg")
-////                            val bytes = ByteArrayOutputStream()
-////                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-////                            val path: String = MediaStore.Images.Media.insertImage(
-////                                context.contentResolver,
-////                                tempPhoto.value,
-////                                "Title",
-////                                null
-////                            )
-////                            val uri: Uri = Uri.parse(path)
-////                            newPhoto.value = uri.path?.let { File(it) }
-//
-                            val photoAddCheck = humanApi.photoAdd(body)
-//                            Log.i("check", photoAddCheck.toString())
-//                            val addInfo = HumanAdd(
-//                                    fullname = fullName.value,
-//                                    birthdate = birthdateValue.value,
-//                                    phone = phoneValue.value,
-//                                    )
-//                            humanApi.addHuman(token.value, addInfo, newPhoto.value!!)
+                            try {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val photo2update =
+                                        result.value?.let { convertBitmap2File(context, it) }
+                                    val addInfo = photo2update?.let {
+                                        HumanUpdate(
+                                            fullname = fullName.value,
+                                            birthdate = birthdateValue.value,
+                                            phone = phoneValue.value,
+                                            photo = it
+                                        )
+                                    }
+
+                                    addInfo?.let {
+                                        operationSuccess.value =
+                                            humanApi.updateHuman(token.value, humanId.intValue, it)
+                                    }
+                                }
+                                if (operationSuccess.value) {
+                                    messages(context, "changes_saved")
+                                    operationSuccess.value = false
+                                } else {
+                                    Log.i("wrong_photo", "photo is incorrect")
+                                    messages(context, "wrong_photo")
+                                }
+                            } catch (e: NullPointerException) {
+                                Log.e("no_photo", "user don`t make photo")
+                                messages(context, "no_photo")
+                            }
                         }
                     } else {
                         ButtonComponent(
@@ -246,44 +232,58 @@ fun PersonInfoScreen() {
                                 .weight(1.5f)
                                 .padding(5.dp)
                         ) {
-                            messages(context, "changes_saved")
-                            val file = newPhoto.value.path?.let { File(it) }
-                            val jpegBytes = file?.readBytes()
-                            val requestBody = jpegBytes?.toRequestBody("image/*".toMediaType())
-                            val body = requestBody?.let {
-                                MultipartBody.Part.createFormData(
-                                    "photo", "photo.jpg",
-                                    it
-                                )
-                            }
-                            CoroutineScope(Dispatchers.IO).launch {
-////                            val wrapper = ContextWrapper(context)
-////                            var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
-////                            file = File(file,"${UUID.randomUUID()}.jpg")
-////                            val bytes = ByteArrayOutputStream()
-////                            tempPhoto.value?.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-////                            val path: String = MediaStore.Images.Media.insertImage(
-////                                context.contentResolver,
-////                                tempPhoto.value,
-////                                "Title",
-////                                null
-////                            )
-////                            val uri: Uri = Uri.parse(path)
-////                            newPhoto.value = uri.path?.let { File(it) }
-//
-                                val photoAddCheck = humanApi.photoAdd(body)
-//                            Log.i("check", photoAddCheck.toString())
-////                            val addInfo = HumanAdd(
-////                                    fullname = fullName.value,
-////                                    birthdate = birthdateValue.value,
-////                                    phone = phoneValue.value,
-////                                    )
-////                            humanApi.addHuman(user.value, addInfo, newPhoto.value!!)
-//                        }
+                            if (fullName.value != "") {
+                                try {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val status = humanApi.checkSubscribe(token.value)
+                                        if (status.date_status) {
+                                            if (status.slots_status) {
+                                                val photo2add =
+                                                    result.value?.let {
+                                                        convertBitmap2File(
+                                                            context,
+                                                            it
+                                                        )
+                                                    }
+                                                val addInfo =
+                                                    photo2add?.let {
+                                                        HumanAdd(
+                                                            fullName.value,
+                                                            birthdateValue.value,
+                                                            phoneValue.value,
+                                                            it
+                                                        )
+                                                    }
+
+                                                operationSuccess.value = humanApi.addHuman(
+                                                    token.value,
+                                                    addInfo!!
+                                                )
+
+                                            } else {
+                                                Log.i("slots_limit", "user slots are full")
+                                                messages(context, "slots_limit")
+                                            }
+                                        } else {
+                                            Log.i("subscribe_end", "user subscribe is end")
+                                            messages(context, "subscribe_end")
+                                        }
+                                    }
+                                    if (operationSuccess.value) {
+                                        messages(context, "human_added")
+                                        operationSuccess.value = false
+                                    } else {
+                                        Log.i("wrong_photo", "photo is incorrect")
+                                        messages(context, "wrong_photo")
+                                    }
+                                } catch (e: NullPointerException) {
+                                    Log.e("no_photo", "user don`t make photo")
+                                    messages(context, "no_photo")
+                                }
+                            } else {
+                                messages(context, "fullname_add")
                             }
                         }
-//
-//                    }
                         ButtonComponent(
                             value = stringResource(id = R.string.back),
                             modifier = Modifier
@@ -300,19 +300,13 @@ fun PersonInfoScreen() {
             }
         }
     }else{
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(28.dp)
-        ) {
-            LoadingComponent()
-        }
+        LoadingComponent()
     }
     BackHandler(enabled = true){
         QuickIdentiAppRouter.navigateTo(QuickIdentiAppRouter.historyScreenList[QuickIdentiAppRouter.lastHistoryIndex.value], false)
     }
 }
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview

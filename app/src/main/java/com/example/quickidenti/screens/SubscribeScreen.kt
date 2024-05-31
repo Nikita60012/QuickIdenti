@@ -1,6 +1,7 @@
 package com.example.quickidenti.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -29,14 +30,20 @@ import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
 import com.example.quickidenti.api.Subscribe
 import com.example.quickidenti.app.retrofit
+import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.TextComponent
+import com.example.quickidenti.dto.subscribe.SubscribeBuy
 import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.ui.theme.Primary
 import com.example.quickidenti.ui.theme.PrimarySlider
 import com.example.quickidenti.ui.theme.Secondary
 import com.example.quickidenti.ui.theme.SecondarySlider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -97,19 +104,19 @@ fun SubscribeScreen(){
                 fontSize = 20)
             Spacer(modifier = Modifier.height(30.dp))
             ButtonComponent(value = stringResource(id = R.string.buy)) {
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    try {
-//                        isSuccess.value = subscribeApi.buySubscribe(
-//                            token.value, SubscribeBuy(
-//                                days = daysSliderPosition.toInt(),
-//                                slots = slotsSliderPosition.toInt()
-//                            )
-//                        )
-//                    }catch (timeOut: SocketTimeoutException){
-//                        Log.i("serverError", "server not found")
-//                        messages(context, "server")
-//                    }
-//                }
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        isSuccess.value = subscribeApi.buySubscribe(
+                            token.value, SubscribeBuy(
+                                days = daysSliderPosition.toInt(),
+                                slots = slotsSliderPosition.toInt()
+                            )
+                        )
+                    }catch (timeOut: SocketTimeoutException){
+                        Log.i("serverError", "server not found")
+                        messages(context, "server")
+                    }
+                }
                 if(isSuccess.value){
                     messages(context, "subscribe_bought")
                 }else{

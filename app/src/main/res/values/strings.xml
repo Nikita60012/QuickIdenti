@@ -45,4 +45,10 @@
     <string name="internet">There is no internet connection</string>
     <string name="email_already_exist">A user with such an email already exists</string>
     <string name="add_human_data">Add</string>
+    <string name="human_data_added">Data added</string>
+    <string name="add_fullname">Add fullname</string>
+    <string name="subscribe_end">Your subscribe is end</string>
+    <string name="slots_limit">Your slots are full</string>
+    <string name="wrong_photo">Photo is incorrect</string>
+    <string name="no_photo">Photo is missing</string>
 </resources>

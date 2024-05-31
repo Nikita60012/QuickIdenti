@@ -45,4 +45,10 @@
     <string name="internet">Отсутствует подключение к интернету</string>
     <string name="email_already_exist">Пользователь с такой почтой уже существует</string>
     <string name="add_human_data">Добавить</string>
+    <string name="human_data_added">Данные добавлены</string>
+    <string name="add_fullname">Введите ФИО</string>
+    <string name="subscribe_end">Ваша подписка кончилась</string>
+    <string name="slots_limit">ваши слоты закончились</string>
+    <string name="wrong_photo">Фото не корректно</string>
+    <string name="no_photo">Отсутствует фотография</string>
 </resources>

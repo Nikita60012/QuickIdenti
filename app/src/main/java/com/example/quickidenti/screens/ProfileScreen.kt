@@ -35,6 +35,7 @@ import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.LoadingComponent
+import com.example.quickidenti.components.MaskVisualTransformation
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
@@ -113,7 +114,8 @@ fun ProfileScreen(){
                     labelValue = phoneLabel.value,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     textValue = phoneValue.value,
-                    onValueChange = { phoneValue.value = it },
+                    onValueChange = { if(it.length <= 10){ phoneValue.value = it }},
+                    mask = MaskVisualTransformation("+7(XXX) XXX-XX-XX"),
                     painterResource = painterResource(
                         id = R.drawable.phone_outline
                     )
@@ -177,7 +179,7 @@ fun ProfileScreen(){
                                                 emailValue.value,
                                                 newPassword.value,
                                                 oldPassword.value,
-                                                phoneValue.value
+                                                "+7" + phoneValue.value
                                             )
                                         )
                                         if (changesSavedStatus.value) {

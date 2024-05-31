@@ -161,14 +161,7 @@ fun IdentificationResultScreen(){
             }
         }
     }else{
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(28.dp)
-        ) {
-            LoadingComponent()
-        }
+        LoadingComponent()
     }
     BackHandler(enabled = true) {
         QuickIdentiAppRouter.navigateTo(QuickIdentiAppRouter.historyScreenList[QuickIdentiAppRouter.lastHistoryIndex.value], false)

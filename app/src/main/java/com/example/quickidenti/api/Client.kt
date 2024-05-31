@@ -22,9 +22,13 @@ interface Client {
     suspend fun infoClient(@Path("client_token") clientToken: String): clientInfo
 
     @PUT("client/client_update/{client_token}")
-    suspend fun changeClientData(@Path("client_token") clientToken: String,
-                                 @Body changeData: ClientChangeData): Boolean
+    suspend fun changeClientData(
+        @Path("client_token") clientToken: String,
+        @Body changeData: ClientChangeData
+    ): Boolean
 
     @PUT("client/client_exit/{client_token}")
     suspend fun clientExit(@Path("client_token") clientToken: String)
+
+
 }

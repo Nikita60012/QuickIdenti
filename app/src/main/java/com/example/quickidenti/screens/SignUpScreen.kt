@@ -30,6 +30,7 @@ import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.ClickableTextComponent
+import com.example.quickidenti.components.MaskVisualTransformation
 import com.example.quickidenti.components.PasswordTextFieldComponent
 import com.example.quickidenti.components.TextComponent
 import com.example.quickidenti.components.TextFieldComponent
@@ -96,42 +97,40 @@ fun SignUpScreen(){
                 labelValue = stringResource(id = R.string.phone_number),
                 painterResource = painterResource(id = R.drawable.phone_outline),
                 textValue = phoneValue.value,
-                onValueChange = {phoneValue.value = it},
+                onValueChange = { if(it.length <= 10){phoneValue.value = it}},
+                mask = MaskVisualTransformation("+7(XXX) XXX-XX-XX"),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
             Spacer(modifier = Modifier.height(40.dp))
             ButtonComponent(
                 value = stringResource(id = R.string.sign_up)
             ) {
-                if(matches("(.+@)((mail\\.(com|ru))|(yandex\\.ru))", emailValue.value)
-                    && matches("(\\+|^)\\d{11}", phoneValue.value))
-                    if(password.value == passwordToSubmit.value) {
+                if(matches("(.+@)((mail\\.(com|ru))|(yandex\\.ru))", emailValue.value)) {
+                    if (password.value == passwordToSubmit.value) {
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
                                 val result = clientApi.regClient(
                                     ClientReg(
                                         emailValue.value,
                                         password.value,
-                                        phoneValue.value
+                                        "+7" + phoneValue.value
                                     )
                                 )
                                 isSuccess.value = result.enter
                                 if (isSuccess.value) {
-                                    token.value = emailValue.value
+                                    token.value = result.token
                                     QuickIdentiAppRouter.navigateTo(Screen.InfoScreen, true)
+                                } else {
+                                    Log.i("emailAlreadyExist", "email already exist")
+                                    messages(context, "email_already_exist")
                                 }
-                            }catch (timeOut: SocketTimeoutException){
-                            Log.i("serverError", "server not found")
-                            messages(context, "server")
+                            } catch (timeOut: SocketTimeoutException) {
+                                Log.i("serverError", "server not found")
+                                messages(context, "server")
                             }
                         }
-                        if (!isSuccess.value){
-                            Log.i("emailAlreadyExist", "email already exist")
-                            messages(context, "email_already_exist")
-                        }
-                    }
-                    else
+                    } else
                         messages(context, "passwords_are_not_equals")
-                else
+                }else
                     messages(context, "entering_data_incorrect")
             }
             Spacer(modifier = Modifier.height(100.dp))

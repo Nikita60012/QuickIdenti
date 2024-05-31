@@ -72,5 +72,35 @@ fun messages(context: Context, error: String){
                 Toast.makeText(context, getString(context, R.string.error_happened), Toast.LENGTH_SHORT).show()
             }
         }
+        "human_added" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.human_data_added), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "fullname_add" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.add_fullname), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "subscribe_end" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.subscribe_end), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "slots_limit" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.slots_limit), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "wrong_photo" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.wrong_photo), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "no_photo" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.no_photo), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
