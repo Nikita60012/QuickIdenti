@@ -120,47 +120,91 @@ fun TextFieldComponent(
     painterResource: Painter?,
     textValue: String,
     mask: MaskVisualTransformation = MaskVisualTransformation(""),
+    withoutPatternField: Boolean = false,
     onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default){
-    if (painterResource != null)
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(4.dp)),
-        value = textValue,
-        label = { Text(text = labelValue) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor =  Primary,
-            focusedLabelColor = Primary,
-            cursorColor = Primary,
-            backgroundColor = BgColor
-        ),
-        keyboardOptions = keyboardOptions,
-        visualTransformation = mask,
-        singleLine = true,
-        onValueChange = onValueChange,
-        leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "")
-        }
-    )
-    else
-        OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(4.dp)),
-        value = textValue,
-        label = { Text(text = labelValue) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor =  Primary,
-            focusedLabelColor = Primary,
-            cursorColor = Primary,
-            backgroundColor = BgColor
-        ),
-        keyboardOptions = keyboardOptions,
-        visualTransformation = mask,
-        singleLine = true,
-        onValueChange = onValueChange
-    )
+    if (withoutPatternField){
+        if (painterResource != null)
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(4.dp)),
+                value = textValue,
+                label = { Text(text = labelValue) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor =  Primary,
+                    focusedLabelColor = Primary,
+                    cursorColor = Primary,
+                    backgroundColor = BgColor
+                ),
+                keyboardOptions = keyboardOptions,
+                visualTransformation = VisualTransformation.None,
+                singleLine = true,
+                onValueChange = onValueChange,
+                leadingIcon = {
+                    Icon(painter = painterResource, contentDescription = "")
+                }
+            )
+        else
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(4.dp)),
+                value = textValue,
+                label = { Text(text = labelValue) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor =  Primary,
+                    focusedLabelColor = Primary,
+                    cursorColor = Primary,
+                    backgroundColor = BgColor
+                ),
+                keyboardOptions = keyboardOptions,
+                visualTransformation = VisualTransformation.None,
+                singleLine = true,
+                onValueChange = onValueChange
+            )
+    }else{
+        if (painterResource != null)
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(4.dp)),
+                value = textValue,
+                label = { Text(text = labelValue) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor =  Primary,
+                    focusedLabelColor = Primary,
+                    cursorColor = Primary,
+                    backgroundColor = BgColor
+                ),
+                keyboardOptions = keyboardOptions,
+                visualTransformation = mask,
+                singleLine = true,
+                onValueChange = onValueChange,
+                leadingIcon = {
+                    Icon(painter = painterResource, contentDescription = "")
+                }
+            )
+        else
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(4.dp)),
+                value = textValue,
+                label = { Text(text = labelValue) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor =  Primary,
+                    focusedLabelColor = Primary,
+                    cursorColor = Primary,
+                    backgroundColor = BgColor
+                ),
+                keyboardOptions = keyboardOptions,
+                visualTransformation = mask,
+                singleLine = true,
+                onValueChange = onValueChange
+            )
+    }
+
 }
 
 @Composable

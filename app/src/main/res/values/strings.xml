@@ -51,4 +51,6 @@
     <string name="slots_limit">Your slots are full</string>
     <string name="wrong_photo">Photo is incorrect</string>
     <string name="no_photo">Photo is missing</string>
+    <string name="human_deleted">Human deleted</string>
+    <string name="no_people_in_list">You don`t have any people on the list to identify</string>
 </resources>

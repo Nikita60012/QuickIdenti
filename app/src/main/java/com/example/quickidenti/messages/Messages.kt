@@ -102,5 +102,15 @@ fun messages(context: Context, error: String){
                 Toast.makeText(context, getString(context, R.string.no_photo), Toast.LENGTH_SHORT).show()
             }
         }
+        "no_people_in_list" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.no_people_in_list), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "human_deleted" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.human_deleted), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

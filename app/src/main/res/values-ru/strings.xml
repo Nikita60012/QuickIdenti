@@ -51,4 +51,6 @@
     <string name="slots_limit">ваши слоты закончились</string>
     <string name="wrong_photo">Фото не корректно</string>
     <string name="no_photo">Отсутствует фотография</string>
+    <string name="human_deleted">Данные человека удалены</string>
+    <string name="no_people_in_list">Ваш список для идентификации пуст</string>
 </resources>

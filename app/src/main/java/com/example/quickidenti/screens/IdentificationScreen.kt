@@ -36,6 +36,7 @@ import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
 import com.example.quickidenti.components.convertBitmap2File
+import com.example.quickidenti.dto.identification.request.Identificate
 import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
@@ -93,27 +94,38 @@ fun IdentificationScreen(){
             ButtonComponent(value = stringResource(id = R.string.identification)) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val status = identificationApi.checkSubscribe(token.value)
-                    if(status.date_status) {
-                        try{
-                        val photo = result.value?.let { convertBitmap2File(context, it) }
-                        photo?.let {
-                            operationSuccess.value =
-                                identificationApi.identification(token.value, it)
+                    if (status.date_status) {
+                        val peopleAvailability = identificationApi.checkPeopleAvailability(token.value)
+                        if(peopleAvailability) {
+                            try {
+                                val photo = result.value?.let { convertBitmap2File(context, it) }
+
+                                operationSuccess.value =
+                                    identificationApi.identification(
+                                        token.value,
+                                        Identificate(photo = photo!!)
+                                    )
+                                if (operationSuccess.value) {
+                                    QuickIdentiAppRouter.navigateTo(
+                                        Screen.IdentificationResultScreen,
+                                        true
+                                    )
+                                } else {
+                                    Log.i("wrong_photo", "photo is incorrect")
+                                    messages(context, "wrong_photo")
+                                }
+                            } catch (e: NullPointerException) {
+                                Log.e("no_photo", "user don`t make photo")
+                                messages(context, "no_photo")
+                            }
+                        }else{
+                            Log.i("no_people_in_list", "user haven`t people in list to identificate")
+                            messages(context, "no_people_in_list")
                         }
-                        }catch (e: NullPointerException){
-                            Log.e("no_photo", "user don`t make photo")
-                            messages(context, "no_photo")
-                        }
-                    }else{
+                    } else {
                         Log.i("subscribe_end", "user subscribe is end")
                         messages(context, "subscribe_end")
                     }
-                }
-                if (operationSuccess.value) {
-                    QuickIdentiAppRouter.navigateTo(Screen.IdentificationResultScreen, true)
-                }else{
-                    Log.i("wrong_photo", "photo is incorrect")
-                    messages(context, "wrong_photo")
                 }
             }
         }

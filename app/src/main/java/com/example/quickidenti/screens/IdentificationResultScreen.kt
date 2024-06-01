@@ -69,12 +69,12 @@ fun IdentificationResultScreen(){
             conclusion.value = data.conclusion
             val loading = ImageLoader(context)
             val knownRequest = ImageRequest.Builder(context)
-                .data("http:/10.0.2.2:8000/identification_people/identification_get_known_person_photo/${token.value}/2")
+                .data("http:/192.168.0.106:8000/identification_people/identification_get_known_person_photo/${token.value}/2")
                 .build()
             val knownImage = (loading.execute(knownRequest) as SuccessResult).drawable
             knownPhoto.value = knownImage.toBitmap()
             val unknownRequest = ImageRequest.Builder(context)
-                .data("http:/10.0.2.2:8000/identification_people/identification_get_unknown_person_photo/${token.value}/2")
+                .data("http:/192.168.0.106:8000/identification_people/identification_get_unknown_person_photo/${token.value}/2")
                 .build()
             val unknownImage = (loading.execute(unknownRequest) as SuccessResult).drawable
             unknownPhoto.value = unknownImage.toBitmap()

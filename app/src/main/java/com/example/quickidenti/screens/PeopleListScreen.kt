@@ -2,7 +2,6 @@ package com.example.quickidenti.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -95,7 +94,7 @@ fun PeopleListScreen(){
                         }
                     })
                 if(humanDeleted.value){
-                    Toast.makeText(context, "Human deleted", Toast.LENGTH_SHORT).show()
+                    messages(context, "human_deleted")
                     humanDeleted.value = false
                 }
             }

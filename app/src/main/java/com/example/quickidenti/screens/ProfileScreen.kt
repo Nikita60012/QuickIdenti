@@ -104,6 +104,7 @@ fun ProfileScreen(){
                     labelValue = emailLabel.value,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     textValue = emailValue.value,
+                    withoutPatternField = true,
                     onValueChange = { emailValue.value = it },
                     painterResource = painterResource(
                         id = R.drawable.email_outline

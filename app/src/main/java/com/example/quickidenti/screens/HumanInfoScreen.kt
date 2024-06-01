@@ -71,7 +71,7 @@ import java.net.SocketTimeoutException
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @Composable
 fun PersonInfoScreen() {
 
@@ -103,7 +103,7 @@ fun PersonInfoScreen() {
                 phoneValue.value = currentPeople.phone
                 val loading = ImageLoader(context)
                 val request = ImageRequest.Builder(context)
-                    .data("http:/10.0.2.2:8000/edit_people/get_human_photo/${token.value}/${humanId.intValue}")
+                    .data("http:/192.168.0.106:8000/edit_people/get_human_photo/${token.value}/${humanId.intValue}")
                     .build()
                 val image = (loading.execute(request) as SuccessResult).drawable
                 photo.value = image.toBitmap()
@@ -164,6 +164,7 @@ fun PersonInfoScreen() {
                     labelValue = stringResource(id = R.string.fullname),
                     textValue = fullName.value,
                     onValueChange = { fullName.value = it },
+                    withoutPatternField = true,
                     painterResource = null
                 )
                 TextFieldComponent(
@@ -210,13 +211,13 @@ fun PersonInfoScreen() {
                                         operationSuccess.value =
                                             humanApi.updateHuman(token.value, humanId.intValue, it)
                                     }
-                                }
-                                if (operationSuccess.value) {
-                                    messages(context, "changes_saved")
-                                    operationSuccess.value = false
-                                } else {
-                                    Log.i("wrong_photo", "photo is incorrect")
-                                    messages(context, "wrong_photo")
+                                    if (operationSuccess.value) {
+                                        messages(context, "changes_saved")
+                                        operationSuccess.value = false
+                                    } else {
+                                        Log.i("wrong_photo", "photo is incorrect")
+                                        messages(context, "wrong_photo")
+                                    }
                                 }
                             } catch (e: NullPointerException) {
                                 Log.e("no_photo", "user don`t make photo")
@@ -233,7 +234,7 @@ fun PersonInfoScreen() {
                                 .padding(5.dp)
                         ) {
                             if (fullName.value != "") {
-                                try {
+
                                     CoroutineScope(Dispatchers.IO).launch {
                                         val status = humanApi.checkSubscribe(token.value)
                                         if (status.date_status) {
@@ -254,12 +255,21 @@ fun PersonInfoScreen() {
                                                             it
                                                         )
                                                     }
-
+                                                try {
                                                 operationSuccess.value = humanApi.addHuman(
                                                     token.value,
-                                                    addInfo!!
-                                                )
-
+                                                    addInfo!!)
+                                                    if (operationSuccess.value) {
+                                                        messages(context, "human_added")
+                                                        operationSuccess.value = false
+                                                    } else {
+                                                        Log.i("wrong_photo", "photo is incorrect")
+                                                        messages(context, "wrong_photo")
+                                                    }
+                                                } catch (e: NullPointerException) {
+                                                    Log.e("no_photo", "user don`t make photo")
+                                                    messages(context, "no_photo")
+                                                }
                                             } else {
                                                 Log.i("slots_limit", "user slots are full")
                                                 messages(context, "slots_limit")
@@ -269,17 +279,6 @@ fun PersonInfoScreen() {
                                             messages(context, "subscribe_end")
                                         }
                                     }
-                                    if (operationSuccess.value) {
-                                        messages(context, "human_added")
-                                        operationSuccess.value = false
-                                    } else {
-                                        Log.i("wrong_photo", "photo is incorrect")
-                                        messages(context, "wrong_photo")
-                                    }
-                                } catch (e: NullPointerException) {
-                                    Log.e("no_photo", "user don`t make photo")
-                                    messages(context, "no_photo")
-                                }
                             } else {
                                 messages(context, "fullname_add")
                             }

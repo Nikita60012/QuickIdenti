@@ -75,6 +75,7 @@ fun SignUpScreen(){
                 labelValue = stringResource(id = R.string.email),
                 painterResource = painterResource(id = R.drawable.email_outline),
                 textValue = emailValue.value,
+                withoutPatternField = true,
                 onValueChange = {emailValue.value = it},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
