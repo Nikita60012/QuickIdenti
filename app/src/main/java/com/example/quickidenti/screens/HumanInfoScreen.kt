@@ -56,8 +56,8 @@ import com.example.quickidenti.components.LoadingComponent
 import com.example.quickidenti.components.MaskVisualTransformation
 import com.example.quickidenti.components.TextFieldComponent
 import com.example.quickidenti.components.convertBitmap2File
-import com.example.quickidenti.dto.human.HumanAdd
-import com.example.quickidenti.dto.human.HumanUpdate
+import com.example.quickidenti.dto.human.request.HumanAdd
+import com.example.quickidenti.dto.human.request.HumanUpdate
 import com.example.quickidenti.messages.messages
 import com.example.quickidenti.navigation.QuickIdentiAppRouter
 import com.example.quickidenti.navigation.Screen
@@ -77,9 +77,9 @@ fun PersonInfoScreen() {
 
 
     val context = LocalContext.current
-    val result = remember { mutableStateOf<Bitmap?>(null) }
+    val photo = remember{ mutableStateOf<Bitmap?>(null)}
     val operationSuccess = remember { mutableStateOf(false)}
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { result.value = it}
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo.value = it}
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { if (it) {
@@ -91,16 +91,19 @@ fun PersonInfoScreen() {
     val fullName = remember { mutableStateOf("")}
     val birthdateValue = remember{ mutableStateOf("")}
     val phoneValue = remember{ mutableStateOf("")}
-    val photo = remember{ mutableStateOf<Bitmap?>(null)}
+
     val humanApi = retrofit.create(People::class.java)
     if(humanId.intValue != -1) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val currentPeople = humanApi.getHuman(token.value, humanId.intValue)
                 sleep(100)
+                val reBirthdate = Regex("-")
+                val birthdate = reBirthdate.replace(currentPeople.birthdate, "")
+                val phone = currentPeople.phone.removePrefix("+7")
                 fullName.value = currentPeople.fullname
-                birthdateValue.value = currentPeople.birthdate
-                phoneValue.value = currentPeople.phone
+                birthdateValue.value = birthdate
+                phoneValue.value = phone
                 val loading = ImageLoader(context)
                 val request = ImageRequest.Builder(context)
                     .data("http:/192.168.0.106:8000/edit_people/get_human_photo/${token.value}/${humanId.intValue}")
@@ -149,7 +152,7 @@ fun PersonInfoScreen() {
                             )
                         }
                     }
-                    result.value?.let {
+                    photo.value?.let {
                         tempPhoto.value = it
                         val image = Bitmap.createScaledBitmap(it, 200, 220, true)
                         Image(
@@ -171,7 +174,7 @@ fun PersonInfoScreen() {
                     labelValue = stringResource(id = R.string.birthdate),
                     textValue = birthdateValue.value,
                     onValueChange = { if(it.length <= 8){ birthdateValue.value = it }},
-                    mask = MaskVisualTransformation("XX-XX-XXXX"),
+                    mask = MaskVisualTransformation("XXXX-XX-XX"),
                     painterResource = null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                 )
@@ -194,34 +197,57 @@ fun PersonInfoScreen() {
                                 .weight(1.5f)
                                 .padding(5.dp)
                         ) {
-                            try {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    val photo2update =
-                                        result.value?.let { convertBitmap2File(context, it) }
-                                    val addInfo = photo2update?.let {
-                                        HumanUpdate(
-                                            fullname = fullName.value,
-                                            birthdate = birthdateValue.value,
-                                            phone = phoneValue.value,
-                                            photo = it
-                                        )
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val status = humanApi.checkSubscribe(token.value)
+                                if (status.date_status) {
+                                    try {
+                                        var phone = ""
+                                        if (phoneValue.value != "") {
+                                            phone = "+7" + phoneValue.value
+                                        }
+                                        val photo2update =
+                                            photo.value?.let {
+                                                convertBitmap2File(
+                                                    context,
+                                                    it
+                                                )
+                                            }
+                                        val addInfo = photo2update?.let {
+                                            HumanUpdate(
+                                                fullName.value,
+                                                birthdateValue.value,
+                                                phone,
+                                                it
+                                            )
+                                        }
+                                         val response =
+                                            humanApi.updateHuman(
+                                                token.value,
+                                                humanId.intValue,
+                                                addInfo!!
+                                            )
+                                        operationSuccess.value = response.status
+                                        if (operationSuccess.value and (response.type == "none")) {
+                                            messages(context, "changes_saved")
+                                            operationSuccess.value = false
+                                        } else if(!operationSuccess.value and (response.type == "wrong photo")) {
+                                            Log.i("wrong_photo", "photo is incorrect")
+                                            messages(context, "wrong_photo")
+                                        } else if(!operationSuccess.value and (response.type == "already exist")){
+                                            Log.i("already_exist", "human already exist")
+                                            messages(context, "already_exist")
+                                        }else if(!operationSuccess.value and (response.type == "incorrect birthdate")){
+                                            Log.i("incorrect_birthdate", "input birthdate is incorrect")
+                                            messages(context, "incorrect_birthdate")
+                                        }
+                                    } catch (e: NullPointerException) {
+                                        Log.e("no_photo", "user don`t make photo")
+                                        messages(context, "no_photo")
                                     }
-
-                                    addInfo?.let {
-                                        operationSuccess.value =
-                                            humanApi.updateHuman(token.value, humanId.intValue, it)
-                                    }
-                                    if (operationSuccess.value) {
-                                        messages(context, "changes_saved")
-                                        operationSuccess.value = false
-                                    } else {
-                                        Log.i("wrong_photo", "photo is incorrect")
-                                        messages(context, "wrong_photo")
-                                    }
+                                } else {
+                                    Log.i("subscribe_end", "user subscribe is end")
+                                    messages(context, "subscribe_end")
                                 }
-                            } catch (e: NullPointerException) {
-                                Log.e("no_photo", "user don`t make photo")
-                                messages(context, "no_photo")
                             }
                         }
                     } else {
@@ -235,66 +261,77 @@ fun PersonInfoScreen() {
                         ) {
                             if (fullName.value != "") {
 
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        val status = humanApi.checkSubscribe(token.value)
-                                        if (status.date_status) {
-                                            if (status.slots_status) {
-                                                val photo2add =
-                                                    result.value?.let {
-                                                        convertBitmap2File(
-                                                            context,
-                                                            it
-                                                        )
-                                                    }
-                                                val addInfo =
-                                                    photo2add?.let {
-                                                        HumanAdd(
-                                                            fullName.value,
-                                                            birthdateValue.value,
-                                                            phoneValue.value,
-                                                            it
-                                                        )
-                                                    }
-                                                try {
-                                                operationSuccess.value = humanApi.addHuman(
-                                                    token.value,
-                                                    addInfo!!)
-                                                    if (operationSuccess.value) {
-                                                        messages(context, "human_added")
-                                                        operationSuccess.value = false
-                                                    } else {
-                                                        Log.i("wrong_photo", "photo is incorrect")
-                                                        messages(context, "wrong_photo")
-                                                    }
-                                                } catch (e: NullPointerException) {
-                                                    Log.e("no_photo", "user don`t make photo")
-                                                    messages(context, "no_photo")
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val status = humanApi.checkSubscribe(token.value)
+                                    if (status.date_status) {
+                                        if (status.slots_status) {
+                                            val photo2add =
+                                                photo.value?.let {
+                                                    convertBitmap2File(
+                                                        context,
+                                                        it
+                                                    )
                                                 }
-                                            } else {
-                                                Log.i("slots_limit", "user slots are full")
-                                                messages(context, "slots_limit")
+                                            var phone = ""
+                                            if (phoneValue.value.isNotEmpty()) {
+                                                phone = "+7" + phoneValue.value
+                                            }
+                                            val addInfo =
+                                                photo2add?.let {
+                                                    HumanAdd(
+                                                        fullName.value,
+                                                        birthdateValue.value,
+                                                        phone,
+                                                        it
+                                                    )
+                                                }
+                                            try {
+                                                 val response = humanApi.addHuman(
+                                                    token.value,
+                                                    addInfo!!
+                                                )
+                                                operationSuccess.value = response.status
+                                                if (operationSuccess.value and (response.type == "none")) {
+                                                    messages(context, "human_added")
+                                                    operationSuccess.value = false
+                                                } else if(!operationSuccess.value and (response.type == "wrong photo")){
+                                                    Log.i("wrong_photo", "photo is incorrect")
+                                                    messages(context, "wrong_photo")
+                                                } else if(!operationSuccess.value and (response.type == "already exist")){
+                                                    Log.i("already_exist", "human already exist")
+                                                    messages(context, "already_exist")
+                                                }else if(!operationSuccess.value and (response.type == "incorrect birthdate")){
+                                                    Log.i("incorrect_birthdate", "input birthdate is incorrect")
+                                                    messages(context, "incorrect_birthdate")
+                                                }
+                                            } catch (e: NullPointerException) {
+                                                Log.e("no_photo", "user don`t make photo")
+                                                messages(context, "no_photo")
                                             }
                                         } else {
-                                            Log.i("subscribe_end", "user subscribe is end")
-                                            messages(context, "subscribe_end")
+                                            Log.i("slots_limit", "user slots are full")
+                                            messages(context, "slots_limit")
                                         }
+                                    } else {
+                                        Log.i("subscribe_end", "user subscribe is end")
+                                        messages(context, "subscribe_end")
                                     }
+                                }
                             } else {
                                 messages(context, "fullname_add")
                             }
                         }
-                        ButtonComponent(
-                            value = stringResource(id = R.string.back),
-                            modifier = Modifier
-                                .width(200.dp)
-                                .heightIn(48.dp)
-                                .weight(1f)
-                                .padding(5.dp)
-                        ) {
-                            QuickIdentiAppRouter.navigateTo(Screen.PeopleListScreen, false)
-                        }
                     }
-
+                    ButtonComponent(
+                        value = stringResource(id = R.string.back),
+                        modifier = Modifier
+                            .width(200.dp)
+                            .heightIn(48.dp)
+                            .weight(1f)
+                            .padding(5.dp)
+                    ) {
+                        QuickIdentiAppRouter.navigateTo(Screen.PeopleListScreen, false)
+                    }
                 }
             }
         }

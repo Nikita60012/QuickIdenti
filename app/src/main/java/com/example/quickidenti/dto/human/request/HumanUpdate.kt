@@ -1,11 +1,8 @@
-package com.example.quickidenti.dto.human
+package com.example.quickidenti.dto.human.request
 
-data class HumanGet(
-    val id: Int,
+data class HumanUpdate(
     val fullname: String,
     val birthdate: String,
     val phone: String,
     val photo: String
-) {
-
-}
+)

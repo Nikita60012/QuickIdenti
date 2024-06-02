@@ -37,6 +37,7 @@ import coil.request.SuccessResult
 import com.example.quickidenti.R
 import com.example.quickidenti.api.Identification
 import com.example.quickidenti.app.humanId
+import com.example.quickidenti.app.identificationId
 import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
@@ -64,17 +65,17 @@ fun IdentificationResultScreen(){
     val identificationApi = retrofit.create(Identification::class.java)
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val data = identificationApi.getIdentification(token.value, 2)
+            val data = identificationApi.getIdentification(token.value, identificationId.intValue)
             humanId.intValue = data.human_id
             conclusion.value = data.conclusion
             val loading = ImageLoader(context)
             val knownRequest = ImageRequest.Builder(context)
-                .data("http:/192.168.0.106:8000/identification_people/identification_get_known_person_photo/${token.value}/2")
+                .data("http:/192.168.0.106:8000/identification_people/identification_get_known_person_photo/${token.value}/${identificationId.intValue}")
                 .build()
             val knownImage = (loading.execute(knownRequest) as SuccessResult).drawable
             knownPhoto.value = knownImage.toBitmap()
             val unknownRequest = ImageRequest.Builder(context)
-                .data("http:/192.168.0.106:8000/identification_people/identification_get_unknown_person_photo/${token.value}/2")
+                .data("http:/192.168.0.106:8000/identification_people/identification_get_unknown_person_photo/${token.value}/${identificationId.intValue}")
                 .build()
             val unknownImage = (loading.execute(unknownRequest) as SuccessResult).drawable
             unknownPhoto.value = unknownImage.toBitmap()

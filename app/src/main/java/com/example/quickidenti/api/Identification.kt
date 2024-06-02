@@ -3,6 +3,7 @@ package com.example.quickidenti.api
 import com.example.quickidenti.dto.client.response.CheckSubscribe
 import com.example.quickidenti.dto.client.response.GetIdentification
 import com.example.quickidenti.dto.identification.request.Identificate
+import com.example.quickidenti.dto.identification.response.IdentificationGet
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -13,7 +14,7 @@ interface Identification {
     suspend fun identification(
         @Path("client_token") clientToken: String,
         @Body photo: Identificate
-    ): Boolean
+    ): IdentificationGet
 
     @GET("/identification_people/identification_get/{client_token}/{identification_id}")
     suspend fun getIdentification(

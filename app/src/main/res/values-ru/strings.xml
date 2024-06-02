@@ -52,5 +52,7 @@
     <string name="wrong_photo">Фото не корректно</string>
     <string name="no_photo">Отсутствует фотография</string>
     <string name="human_deleted">Данные человека удалены</string>
+    <string name="already_exist">Человек с таким именем уже существует</string>
+    <string name="incorrect_birthdate">Дата рождения некорректна</string>
     <string name="no_people_in_list">Ваш список для идентификации пуст</string>
 </resources>

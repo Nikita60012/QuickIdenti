@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.quickidenti.R
+import com.example.quickidenti.api.Client
 import com.example.quickidenti.navigation.AppBar
 import com.example.quickidenti.navigation.DrawerBody
 import com.example.quickidenti.navigation.DrawerHeaderNav
@@ -37,6 +38,8 @@ import com.example.quickidenti.screens.ProfileScreen
 import com.example.quickidenti.screens.SignInScreen
 import com.example.quickidenti.screens.SignUpScreen
 import com.example.quickidenti.screens.SubscribeScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -55,6 +58,7 @@ val retrofit = Retrofit.Builder()
    .build()
 val token = mutableStateOf("empty")
 val humanId = mutableIntStateOf(-1)
+val identificationId = mutableIntStateOf(-1)
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -141,6 +145,10 @@ fun QuickIdentiApp() {
                             QuickIdentiAppRouter.navigateTo(Screen.SignInScreen, false)
                             scope.launch {
                                 scaffoldState.drawerState.close()
+                            }
+                            val exitApi = retrofit.create(Client::class.java)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                exitApi.clientExit(token.value)
                             }
                         }
                     }

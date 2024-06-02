@@ -3,12 +3,14 @@ package com.example.quickidenti.api
 import com.example.quickidenti.dto.People.PeopleInfo
 import com.example.quickidenti.dto.People.PeopleList
 import com.example.quickidenti.dto.client.response.CheckSubscribe
-import com.example.quickidenti.dto.human.HumanAdd
-import com.example.quickidenti.dto.human.HumanUpdate
+import com.example.quickidenti.dto.human.request.HumanAdd
+import com.example.quickidenti.dto.human.request.HumanUpdate
+import com.example.quickidenti.dto.human.response.StatusGet
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface People {
@@ -31,14 +33,14 @@ interface People {
     suspend fun addHuman(
         @Path("client_token") clientToken: String,
         @Body addHuman: HumanAdd
-    ): Boolean
+    ): StatusGet
 
-    @POST("/edit_people/human_update/{client_token}/{human_id}")
+    @PUT("/edit_people/human_update/{client_token}/{human_id}")
     suspend fun updateHuman(
         @Path("client_token") clientToken: String,
         @Path("human_id") humanId: Int,
         @Body updHuman: HumanUpdate
-    ): Boolean
+    ): StatusGet
 
     @GET("client/client_check_subscribe/{client_token}")
     suspend fun checkSubscribe(@Path("client_token") clientToken: String): CheckSubscribe

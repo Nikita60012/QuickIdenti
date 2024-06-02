@@ -165,22 +165,22 @@ fun ProfileScreen(){
                             "(.+@)((mail\\.(com|ru))|(yandex\\.ru))",
                             emailValue.value
                         ) || emailValue.value == "")
-                        && (Pattern.matches(
-                            "(\\+|^)\\d{11}",
-                            phoneValue.value
-                        ) || phoneValue.value == "")
                     ) {
                         if (newPassword.value == passwordToSubmit.value) {
                             if (newPassword.value != oldPassword.value) {
                                 CoroutineScope(Dispatchers.IO).launch {
                                     try {
+                                        var phone = ""
+                                        if(phoneValue.value != ""){
+                                            phone = "+7" + phoneValue.value
+                                        }
                                         changesSavedStatus.value = clientApi.changeClientData(
                                             token.value,
                                             ClientChangeData(
                                                 emailValue.value,
                                                 newPassword.value,
                                                 oldPassword.value,
-                                                "+7" + phoneValue.value
+                                                phone
                                             )
                                         )
                                         if (changesSavedStatus.value) {

@@ -109,11 +109,15 @@ fun SignUpScreen(){
                     if (password.value == passwordToSubmit.value) {
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
+                                var phone = ""
+                                if(phoneValue.value.isNotEmpty()){
+                                    phone = "+7" + phoneValue.value
+                                }
                                 val result = clientApi.regClient(
                                     ClientReg(
                                         emailValue.value,
                                         password.value,
-                                        "+7" + phoneValue.value
+                                        phone
                                     )
                                 )
                                 isSuccess.value = result.enter

@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.quickidenti.R
 import com.example.quickidenti.api.Identification
+import com.example.quickidenti.app.identificationId
 import com.example.quickidenti.app.retrofit
 import com.example.quickidenti.app.token
 import com.example.quickidenti.components.ButtonComponent
@@ -99,12 +100,13 @@ fun IdentificationScreen(){
                         if(peopleAvailability) {
                             try {
                                 val photo = result.value?.let { convertBitmap2File(context, it) }
-
-                                operationSuccess.value =
+                                val response =
                                     identificationApi.identification(
                                         token.value,
                                         Identificate(photo = photo!!)
                                     )
+                                operationSuccess.value = response.success
+                                identificationId.intValue = response.identification_id
                                 if (operationSuccess.value) {
                                     QuickIdentiAppRouter.navigateTo(
                                         Screen.IdentificationResultScreen,

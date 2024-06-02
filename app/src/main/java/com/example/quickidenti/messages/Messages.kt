@@ -112,5 +112,15 @@ fun messages(context: Context, error: String){
                 Toast.makeText(context, getString(context, R.string.human_deleted), Toast.LENGTH_SHORT).show()
             }
         }
+        "already_exist" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.already_exist), Toast.LENGTH_SHORT).show()
+            }
+        }
+        "incorrect_birthdate" ->{
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, getString(context, R.string.incorrect_birthdate), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

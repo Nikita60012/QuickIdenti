@@ -1,4 +1,4 @@
-package com.example.quickidenti.dto.human
+package com.example.quickidenti.dto.human.request
 
 data class HumanAdd(
     val fullname: String,
